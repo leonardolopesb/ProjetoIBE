@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
-import './App.css';
+import { useState } from 'react';
+import { useEffect } from 'react';
 
+// Interfaces tipadas para o TypeScript
 interface Contagem {
   quantidade: number;
 }
@@ -13,17 +14,17 @@ interface Culto {
 }
 
 function App() {
-  const dataHoje = new Date().toISOString();
+  // Pega a data de hoje no formato YYYY-MM-DD para preencher o calendário por padrão
+  const dataHoje = new Date().toISOString().split('T')[0];
 
+  // Estados do formulário e da tabela
   const [data, setData] = useState<string>(dataHoje);
   const [turno, setTurno] = useState<number>(1);
   const [quantidade, setQuantidade] = useState<number>(0);
   const [mensagem, setMensagem] = useState<string>('');
-
-  // Estado para guardar a lista de cultos
   const [listaCultos, setListaCultos] = useState<Culto[]>([]);
 
-  // READ
+  // Função para buscar os cultos (READ)
   const carregarCultos = async () => {
     try {
       const resposta = await fetch('http://localhost:5115/api/Cultos');
@@ -36,15 +37,15 @@ function App() {
     }
   };
 
+  // Executa o "carregarCultos" automaticamente apenas uma vez quando a tela abre
   useEffect(() => {
     const inicializarDados = async () => {
       await carregarCultos();
     };
-
     inicializarDados();
   }, []);
 
-  // CREATE
+  // Função para Salvar (CREATE)
   const salvarCulto = async () => {
     setMensagem('Salvando...');
 
@@ -64,7 +65,7 @@ function App() {
       if (resposta.ok) {
         setMensagem('Culto salvo com sucesso!');
         setQuantidade(0);
-        carregarCultos();
+        carregarCultos(); // Recarrega a tabela para mostrar o novo culto na hora
       } else {
         setMensagem('Erro ao salvar no banco.');
       }
@@ -73,7 +74,7 @@ function App() {
     }
   };
 
-  // DELETE
+  // Função para Excluir (DELETE)
   const excluirCulto = async (id: string) => {
     if (!window.confirm("Tem certeza que deseja excluir esta contagem?")) return;
 
@@ -83,7 +84,7 @@ function App() {
       });
 
       if (resposta.ok) {
-        carregarCultos();
+        carregarCultos(); // Recarrega a tabela após apagar
       } else {
         alert('Erro ao excluir culto.');
       }
@@ -99,10 +100,8 @@ function App() {
         <h1>Recepção IBE</h1>
         <p>Sistema interno para controle de contagens e cultos.</p>
 
-        {/* Formulário (Manteve-se inalterado, apenas centralizado e organizado) */}
+        {/* Formulário */}
         <div style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '8px', marginTop: '20px', backgroundColor: '#f9f9f9', color: '#333', maxWidth: '400px', margin: '20px auto' }}>
-          <h3 style={{ marginTop: 0 }}>Nova Contagem</h3>
-
           <div style={{ marginBottom: '15px', textAlign: 'left' }}>
             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Data do Culto:</label>
             <input type="date" value={data} onChange={(e) => setData(e.target.value)} style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }} />
@@ -129,9 +128,9 @@ function App() {
         </div>
 
         {/* Tabela de Visualização do CRUD */}
-        <div style={{ marginTop: '40px' }}>
+        <div style={{ marginTop: '36px' }}>
           <h3>Registros Salvos</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', backgroundColor: '#fff', border: '1px solid #ccc' }}>
+          <table style={{ marginTop: '16px', width: '100%', borderCollapse: 'collapse', textAlign: 'center', backgroundColor: '#fff', border: '1px solid #ccc' }}>
             <thead style={{ backgroundColor: '#eeeeee' }}>
               <tr>
                 <th style={{ padding: '10px', borderBottom: '1px solid #ccc' }}>Data</th>
@@ -143,10 +142,8 @@ function App() {
             <tbody>
               {listaCultos.map((culto) => (
                 <tr key={culto.id} style={{ borderBottom: '1px solid #eee' }}>
-                  {/* Formatando a data de YYYY-MM-DD para DD/MM/YYYY na tela */}
                   <td style={{ padding: '10px' }}>{culto.data.split('-').reverse().join('/')}</td>
                   <td style={{ padding: '10px' }}>{culto.turno === 1 ? 'Manhã' : 'Noite'}</td>
-                  {/* Pega a primeira contagem, se existir. Evita tela branca se o banco falhar e salvar um culto sem contagem */}
                   <td style={{ padding: '10px' }}>{culto.contagens[0]?.quantidade || 0}</td>
                   <td style={{ padding: '10px' }}>
                     <button
