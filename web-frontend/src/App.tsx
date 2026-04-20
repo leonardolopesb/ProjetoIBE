@@ -84,7 +84,7 @@ function App() {
       });
 
       if (resposta.ok) {
-        carregarCultos(); // Recarrega a tabela após apagar
+        carregarCultos();
       } else {
         alert('Erro ao excluir culto.');
       }
