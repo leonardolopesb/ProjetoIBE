@@ -21,7 +21,7 @@ public class CultosController : ControllerBase
     public async Task<ActionResult<IEnumerable<Culto>>> GetCultos()
     {
         return await _context.Cultos
-            .Include(c => c.Contagens) 
+            .Include(c => c.Contagens)
             .ToListAsync();
     }
 
@@ -45,6 +45,16 @@ public class CultosController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Culto>> PostCulto(Culto culto)
     {
+        culto.CalcularGrupoRecepcao();
+
+        if (culto.Contagens != null)
+        {
+            foreach (var contagem in culto.Contagens)
+            {
+                contagem.CalcularTotal();
+            }
+        }
+
         _context.Cultos.Add(culto);
         await _context.SaveChangesAsync();
 
@@ -57,7 +67,7 @@ public class CultosController : ControllerBase
     {
         if (id != culto.Id)
         {
-            return BadRequest("O ID da URL não bate com o ID do objeto.");
+            return BadRequest("O ID informado não bate com o objeto.");
         }
 
         var cultoExistente = await _context.Cultos
@@ -69,15 +79,26 @@ public class CultosController : ControllerBase
             return NotFound();
         }
 
+        culto.CalcularGrupoRecepcao();
+        if (culto.Contagens != null)
+        {
+            foreach (var contagem in culto.Contagens)
+            {
+                contagem.CalcularTotal();
+            }
+        }
+
         cultoExistente.Data = culto.Data;
         cultoExistente.Turno = culto.Turno;
+        cultoExistente.LiderRecepcao = culto.LiderRecepcao;
+        cultoExistente.GrupoRecepcao = culto.GrupoRecepcao;
 
         _context.Contagens.RemoveRange(cultoExistente.Contagens);
-        cultoExistente.Contagens = culto.Contagens;
+        cultoExistente.Contagens = culto.Contagens!;
 
         await _context.SaveChangesAsync();
 
-        return NoContent();
+        return NoContent(); // Retorna código 204 (Sucesso)
     }
 
     // DELETE: api/Cultos/{id}

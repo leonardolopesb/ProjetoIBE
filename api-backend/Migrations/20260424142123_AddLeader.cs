@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace api_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class AddLeader : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,7 +16,10 @@ namespace api_backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Data = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    Data = table.Column<DateOnly>(type: "date", nullable: false),
+                    Turno = table.Column<int>(type: "integer", nullable: false),
+                    LiderRecepcao = table.Column<string>(type: "text", nullable: false),
+                    GrupoRecepcao = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -28,7 +31,16 @@ namespace api_backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Quantidade = table.Column<int>(type: "integer", nullable: false),
+                    QuantidadeCadeirasA = table.Column<int>(type: "integer", nullable: false),
+                    QuantidadeCadeirasB = table.Column<int>(type: "integer", nullable: false),
+                    QuantidadeCadeirasC = table.Column<int>(type: "integer", nullable: false),
+                    QuantidadeCadeirasD = table.Column<int>(type: "integer", nullable: false),
+                    QuantidadeGaleria = table.Column<int>(type: "integer", nullable: false),
+                    QuantidadePulpito = table.Column<int>(type: "integer", nullable: false),
+                    QuantidadeSalas = table.Column<int>(type: "integer", nullable: false),
+                    QuantidadeExterno = table.Column<int>(type: "integer", nullable: false),
+                    QuantidadeOnline = table.Column<int>(type: "integer", nullable: false),
+                    Total = table.Column<int>(type: "integer", nullable: false),
                     CultoId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
