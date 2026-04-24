@@ -31,7 +31,34 @@ namespace api_backend.Migrations
                     b.Property<Guid>("CultoId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Quantidade")
+                    b.Property<int>("QuantidadeCadeirasA")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuantidadeCadeirasB")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuantidadeCadeirasC")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuantidadeCadeirasD")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuantidadeExterno")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuantidadeGaleria")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuantidadeOnline")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuantidadePulpito")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QuantidadeSalas")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Total")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -49,6 +76,13 @@ namespace api_backend.Migrations
 
                     b.Property<DateOnly>("Data")
                         .HasColumnType("date");
+
+                    b.Property<int>("GrupoRecepcao")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("LiderRecepcao")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("Turno")
                         .HasColumnType("integer");
