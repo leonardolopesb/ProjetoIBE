@@ -47,104 +47,67 @@ export function Contagem({
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '10px' }} >
+    <div style={{ maxWidth: '500px', margin: '0 auto', padding: '20px 10px', height: '100vh', display: 'flex', flexDirection: 'column' }}>
       
-      {/* Injeção de CSS puro para sumir com as setinhas nativas dos navegadores 
-        sem precisar criar um arquivo App.css externo.
-      */}
       <style>{`
-        /* Esconde no Chrome, Edge e Safari */
         input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-          -webkit-appearance: none;
-          margin: 0;
-        }
-        /* Esconde no Firefox */
-        input[type="number"] {
-          -moz-appearance: textfield;
-        }
+        input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type="number"] { -moz-appearance: textfield; }
       `}</style>
 
-      {/* Cabeçalho simples */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <button onClick={() => setTela('home')} style={{ padding: '10px 15px', cursor: 'pointer', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px' }}>← Voltar</button>
-        <h2 style={{ margin: 0, color: '#333' }}>Total: {totalEmTempoReal}</h2>
-        <button onClick={salvarCulto} style={{ padding: '10px 20px', backgroundColor: 'green', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>FINALIZAR</button>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <button onClick={() => setTela('home')} style={{ padding: '8px 12px', cursor: 'pointer', backgroundColor: '#e2e8f0', color: '#475569', border: 'none', borderRadius: '6px', fontWeight: 'bold' }}>Voltar</button>
+        <h2 style={{ margin: 0, color: '#2a70f1', fontSize: '1.5rem' }}>Total: {totalEmTempoReal}</h2>
+        <button onClick={salvarCulto} style={{ padding: '8px 16px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Salvar</button>
       </div>
 
-      {/* Card do Setor */}
-      <div style={{ position: 'relative', border: '1px solid #ccc', borderRadius: '8px', padding: '40px 20px', textAlign: 'center', backgroundColor: '#fff' }}>
+      {/* Card Content - Flex grow pushes the + button down */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
         
-        {/* Botões de navegação lateral (dentro do card) */}
-        <button 
-          onClick={anterior}
-          disabled={indiceAtual === 0}
-          style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', fontSize: '2rem', cursor: indiceAtual === 0 ? 'not-allowed' : 'pointer', color: indiceAtual === 0 ? '#eee' : '#666' }}
-        >
-          ←
-        </button>
+        {/* Nav Buttons (Absolute) */}
+        <button onClick={anterior} disabled={indiceAtual === 0} style={{ position: 'absolute', left: 0, top: '20%', background: 'none', border: 'none', fontSize: '2rem', cursor: indiceAtual === 0 ? 'default' : 'pointer', color: indiceAtual === 0 ? '#e2e8f0' : '#94a3b8' }}>←</button>
+        <button onClick={proximo} disabled={indiceAtual === totalPaginas - 1} style={{ position: 'absolute', right: 0, top: '20%', background: 'none', border: 'none', fontSize: '2rem', cursor: indiceAtual === totalPaginas - 1 ? 'default' : 'pointer', color: indiceAtual === totalPaginas - 1 ? '#e2e8f0' : '#94a3b8' }}>→</button>
 
-        <button 
-          onClick={proximo}
-          disabled={indiceAtual === totalPaginas - 1}
-          style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', fontSize: '2rem', cursor: indiceAtual === totalPaginas - 1 ? 'not-allowed' : 'pointer', color: indiceAtual === totalPaginas - 1 ? '#eee' : '#666' }}
-        >
-          →
-        </button>
-        
-        <h3 style={{ fontSize: '1.8rem', margin: '0 0 20px 0', color: '#333' }}>{setorAtual.nome}</h3>
+        {/* Sector Info */}
+        <h3 style={{ fontSize: '2rem', color: '#1e293b', margin: '10px 0 30px 0' }}>{setorAtual.nome}</h3>
 
-        {/* Input Numérico Direto */}
-        <div style={{ marginBottom: '30px' }}>
-          <input 
-            type="number"
-            name={setorAtual.id}
-            pattern="[0-9]*" // Garante o teclado numérico em celulares
-            value={form[setorAtual.id as keyof FormState] === 0 ? '' : form[setorAtual.id as keyof FormState]}
-            onChange={handleChange}
-            placeholder="0"
-            style={{ 
-              width: '120px', 
-              height: '80px', 
-              fontSize: '3rem', 
-              textAlign: 'center', 
-              border: '2px solid #ccc', 
-              borderRadius: '8px', 
-              fontWeight: 'bold', 
-              outline: 'none' 
-            }}
-          />
+        {/* Number Input */}
+        <input 
+          type="number"
+          name={setorAtual.id}
+          pattern="[0-9]*"
+          value={form[setorAtual.id as keyof FormState] === 0 ? '' : form[setorAtual.id as keyof FormState]}
+          onChange={handleChange}
+          placeholder="0"
+          style={{ width: '150px', height: '100px', fontSize: '4rem', textAlign: 'center', border: '2px solid #cbd5e1', borderRadius: '12px', fontWeight: 'bold', color: '#0f172a', outlineColor: '#0ea5e9', marginBottom: '20px' }}
+        />
+
+        {/* Dots */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: 'auto' }}>
+          {setores.map((_, index) => (
+            <div key={index} style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: index === indiceAtual ? '#2a70f1' : '#cbd5e1' }} />
+          ))}
         </div>
 
-        {/* Botões de + e - */}
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px' }}>
+        {/* Fixed Bottom Controls */}
+        <div style={{ width: '100%', position: 'fixed', bottom: '5%', left: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '30px' }}>
           <button 
             onClick={() => decrementar(setorAtual.id as keyof FormState)}
-            style={{ width: '50px', height: '50px', fontSize: '1.5rem', borderRadius: '50%', border: '1px solid #ccc', cursor: 'pointer', backgroundColor: '#f9f9f9', color: '#dc3545', fontWeight: 'bold' }}
+            style={{ width: '60px', height: '60px', fontSize: '2rem', borderRadius: '50%', border: 'none', backgroundColor: '#d0d0d080', color: '#ef4444', fontWeight: 'bold', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
           >
             -
           </button>
           
           <button 
             onClick={() => incrementar(setorAtual.id as keyof FormState)}
-            style={{ width: '90px', height: '90px', fontSize: '3.5rem', borderRadius: '50%', backgroundColor: '#0056b3', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+            style={{ width: '300px', height: '300px', fontSize: '5rem', borderRadius: '50%', backgroundColor: '#2a70f1', color: 'white', border: 'none', boxShadow: '0 10px 15px -3px rgba(14, 165, 233, 0.5)', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', paddingBottom: '10px' }}
           >
             +
           </button>
         </div>
-      </div>
 
-      {/* Bolinhas Indicadoras (Dots) */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '20px' }}>
-        {setores.map((_, index) => (
-          <div 
-            key={index} 
-            onClick={() => setIndiceAtual(index)}
-            style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: index === indiceAtual ? '#0056b3' : '#ccc', cursor: 'pointer' }}
-          />
-        ))}
       </div>
-
     </div>
   );
 }
