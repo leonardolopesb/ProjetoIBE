@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace api_backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260424142123_AddLeader")]
-    partial class AddLeader
+    [Migration("20260522194044_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -47,28 +47,37 @@ namespace api_backend.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int>("QuantidadeExterno")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasJsonPropertyName("externo");
 
                     b.Property<int>("QuantidadeGaleria")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasJsonPropertyName("galeria");
 
                     b.Property<int>("QuantidadeOnline")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasJsonPropertyName("online");
 
                     b.Property<int>("QuantidadePulpito")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasJsonPropertyName("pulpito");
 
                     b.Property<int>("QuantidadeSalas")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasJsonPropertyName("salas");
 
                     b.Property<int>("Total")
-                        .HasColumnType("integer");
+                        .HasColumnType("integer")
+                        .HasJsonPropertyName("total");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CultoId");
+                    b.HasIndex("CultoId")
+                        .IsUnique();
 
                     b.ToTable("Contagens");
+
+                    b.HasAnnotation("Relational:JsonPropertyName", "contagens");
                 });
 
             modelBuilder.Entity("ApiBackend.Models.Culto", b =>
@@ -78,14 +87,20 @@ namespace api_backend.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateOnly>("Data")
-                        .HasColumnType("date");
+                        .HasColumnType("date")
+                        .HasJsonPropertyName("data");
 
                     b.Property<int>("GrupoRecepcao")
                         .HasColumnType("integer");
 
                     b.Property<string>("LiderRecepcao")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("text")
+                        .HasJsonPropertyName("lider_recepcao");
+
+                    b.Property<DateTime>("Registro")
+                        .HasColumnType("timestamp with time zone")
+                        .HasJsonPropertyName("registro");
 
                     b.Property<int>("Turno")
                         .HasColumnType("integer");
@@ -98,8 +113,8 @@ namespace api_backend.Migrations
             modelBuilder.Entity("ApiBackend.Models.Contagem", b =>
                 {
                     b.HasOne("ApiBackend.Models.Culto", null)
-                        .WithMany("Contagens")
-                        .HasForeignKey("CultoId")
+                        .WithOne("Contagens")
+                        .HasForeignKey("ApiBackend.Models.Contagem", "CultoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

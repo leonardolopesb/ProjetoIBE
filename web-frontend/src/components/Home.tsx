@@ -120,10 +120,10 @@ export function Home({
                 <div key={c.id} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', padding: '15px', border: '1px solid #eaeaea', alignItems: 'center', backgroundColor: '#fcfcfc', marginBottom: '10px', borderRadius: '8px' }}>
 
                   <div style={{ minWidth: '200px', marginBottom: '10px' }}>
-                    <strong style={{ fontSize: '1.1rem', color: '#1A1A1A' }}>{c.data.split('-').reverse().join('/')}</strong> - {c.turno === 1 ? 'Manhã' : 'Noite'}
+                    <strong style={{ fontSize: '1.1rem', color: '#1A1A1A' }}>{c.data.split('-').reverse().join('/')}</strong> - {c.horario}
                     <br />
                     <small style={{ color: '#666', fontSize: '0.9rem' }}>
-                      Líder: {c.liderRecepcao} • Total: <strong style={{ color: '#C30022' }}>{c.contagens[0]?.total || 0}</strong>
+                      Líder: {c.lider_recepcao} • Total: <strong style={{ color: '#C30022' }}>{c.contagens?.total || 0}</strong>
                     </small>
                   </div>
 
@@ -178,19 +178,19 @@ export function Home({
             <h3 style={{ marginTop: 0, marginBottom: '20px', textAlign: 'center', color: '#1A1A1A' }}>Dados da Contagem</h3>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', fontSize: '1rem', color: '#555' }}>
-              <div>Púlpito: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens[0]?.quantidadePulpito || 0}</strong></div>
-              <div>Cadeiras A: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens[0]?.quantidadeCadeirasA || 0}</strong></div>
-              <div>Cadeiras B: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens[0]?.quantidadeCadeirasB || 0}</strong></div>
-              <div>Cadeiras C: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens[0]?.quantidadeCadeirasC || 0}</strong></div>
-              <div>Cadeiras D: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens[0]?.quantidadeCadeirasD || 0}</strong></div>
-              <div>Galeria: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens[0]?.quantidadeGaleria || 0}</strong></div>
-              <div>Salas: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens[0]?.quantidadeSalas || 0}</strong></div>
-              <div>Externo: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens[0]?.quantidadeExterno || 0}</strong></div>
-              <div>Online: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens[0]?.quantidadeOnline || 0}</strong></div>
+              <div>Púlpito: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens?.pulpito || 0}</strong></div>
+              <div>Cadeiras A: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens?.cadeiras?.A || 0}</strong></div>
+              <div>Cadeiras B: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens?.cadeiras?.B || 0}</strong></div>
+              <div>Cadeiras C: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens?.cadeiras?.C || 0}</strong></div>
+              <div>Cadeiras D: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens?.cadeiras?.D || 0}</strong></div>
+              <div>Galeria: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens?.galeria || 0}</strong></div>
+              <div>Salas: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens?.salas || 0}</strong></div>
+              <div>Externo: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens?.externo || 0}</strong></div>
+              <div>Online: <strong style={{ color: '#1A1A1A' }}>{cultoSelecionado.contagens?.online || 0}</strong></div>
             </div>
 
             <div style={{ marginTop: '25px', paddingTop: '15px', borderTop: '1px solid #eee', textAlign: 'center', fontSize: '1.2rem', color: '#2a70f1' }}>
-              Total: <strong>{cultoSelecionado.contagens[0]?.total || 0}</strong>
+              Total: <strong>{cultoSelecionado.contagens?.total || 0}</strong>
             </div>
           </div>
         </div>

@@ -49,10 +49,7 @@ public class CultosController : ControllerBase
 
         if (culto.Contagens != null)
         {
-            foreach (var contagem in culto.Contagens)
-            {
-                contagem.CalcularTotal();
-            }
+            culto.Contagens.CalcularTotal();
         }
 
         _context.Cultos.Add(culto);
@@ -82,10 +79,7 @@ public class CultosController : ControllerBase
         culto.CalcularGrupoRecepcao();
         if (culto.Contagens != null)
         {
-            foreach (var contagem in culto.Contagens)
-            {
-                contagem.CalcularTotal();
-            }
+            culto.Contagens.CalcularTotal();
         }
 
         cultoExistente.Data = culto.Data;
@@ -93,12 +87,15 @@ public class CultosController : ControllerBase
         cultoExistente.LiderRecepcao = culto.LiderRecepcao;
         cultoExistente.GrupoRecepcao = culto.GrupoRecepcao;
 
-        _context.Contagens.RemoveRange(cultoExistente.Contagens);
-        cultoExistente.Contagens = culto.Contagens!;
+        if (cultoExistente.Contagens != null)
+        {
+            _context.Contagens.Remove(cultoExistente.Contagens);
+        }
+        cultoExistente.Contagens = culto.Contagens;
 
         await _context.SaveChangesAsync();
 
-        return NoContent(); // Retorna código 204 (Sucesso)
+        return NoContent();
     }
 
     // DELETE: api/Cultos/{id}
@@ -114,6 +111,6 @@ public class CultosController : ControllerBase
         _context.Cultos.Remove(culto);
         await _context.SaveChangesAsync();
 
-        return NoContent(); // Retorna 204 (Sucesso, sem conteúdo para exibir)
+        return NoContent();
     }
 }
