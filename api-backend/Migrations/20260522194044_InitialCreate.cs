@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace api_backend.Migrations
 {
     /// <inheritdoc />
-    public partial class AddLeader : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -16,6 +16,7 @@ namespace api_backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Registro = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Data = table.Column<DateOnly>(type: "date", nullable: false),
                     Turno = table.Column<int>(type: "integer", nullable: false),
                     LiderRecepcao = table.Column<string>(type: "text", nullable: false),
@@ -31,12 +32,12 @@ namespace api_backend.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    QuantidadePulpito = table.Column<int>(type: "integer", nullable: false),
                     QuantidadeCadeirasA = table.Column<int>(type: "integer", nullable: false),
                     QuantidadeCadeirasB = table.Column<int>(type: "integer", nullable: false),
                     QuantidadeCadeirasC = table.Column<int>(type: "integer", nullable: false),
                     QuantidadeCadeirasD = table.Column<int>(type: "integer", nullable: false),
                     QuantidadeGaleria = table.Column<int>(type: "integer", nullable: false),
-                    QuantidadePulpito = table.Column<int>(type: "integer", nullable: false),
                     QuantidadeSalas = table.Column<int>(type: "integer", nullable: false),
                     QuantidadeExterno = table.Column<int>(type: "integer", nullable: false),
                     QuantidadeOnline = table.Column<int>(type: "integer", nullable: false),
@@ -57,7 +58,8 @@ namespace api_backend.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Contagens_CultoId",
                 table: "Contagens",
-                column: "CultoId");
+                column: "CultoId",
+                unique: true);
         }
 
         /// <inheritdoc />

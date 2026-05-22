@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ApiBackend.Models;
 
@@ -11,24 +13,55 @@ public enum Turno
 public class Culto
 {
     [Key]
+    [JsonPropertyName("id")]
     public Guid Id { get; set; }
 
-    // Data do Culto (dd/mm/yyyy)
+    [JsonPropertyName("registro")]
+    public DateTime Registro { get; set; } = DateTime.UtcNow;
+
+    [JsonPropertyName("data")]
     public DateOnly Data { get; set; }
 
-    // Manhã/Noite
+    [JsonIgnore]
     public Turno Turno { get; set; }
 
-    // Líder da Escala
-    public string LiderRecepcao { get; set; } = null!;
+    [JsonPropertyName("horario")]
+    [NotMapped]
+    public string Horario
+    {
+        get => Turno == Turno.Manha ? "Manhã" : "Noite";
+        set => Turno = value == "Manhã" ? Turno.Manha : Turno.Noite;
+    }
 
-    // Escala da Recepção (número do domingo)
+    [JsonPropertyName("lider_recepcao")]
+    public string LiderRecepcao { get; set; } = string.Empty;
+
+    [JsonIgnore]
     public int GrupoRecepcao { get; set; }
+
+    [JsonPropertyName("grupo")]
+    [NotMapped]
+    public string GrupoFormatado
+    {
+        get => $"{GrupoRecepcao}ª Domingo";
+        set
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                var limpo = value.Replace("ª Domingo", "").Trim();
+                if (int.TryParse(limpo, out int grupo))
+                {
+                    GrupoRecepcao = grupo;
+                }
+            }
+        }
+    }
 
     public void CalcularGrupoRecepcao()
     {
         GrupoRecepcao = ((Data.Day - 1) / 7) + 1;
     }
 
-    public List<Contagem> Contagens { get; set; } = new List<Contagem>();
+    [JsonPropertyName("contagens")]
+    public Contagem? Contagens { get; set; }
 }

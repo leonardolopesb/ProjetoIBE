@@ -74,49 +74,51 @@ function App() {
 
   const prepararEdicao = (culto: Culto) => {
     setEditandoId(culto.id);
-    const contagem = culto.contagens[0] || {};
+    const cont = culto.contagens || {};
+    const cadeiras = cont.cadeiras || {};
     
     setForm({
       data: culto.data.split('T')[0],
-      turno: culto.turno,
-      liderRecepcao: culto.liderRecepcao,
-      quantidadePulpito: contagem.quantidadePulpito || 0,
-      quantidadeCadeirasA: contagem.quantidadeCadeirasA || 0,
-      quantidadeCadeirasB: contagem.quantidadeCadeirasB || 0,
-      quantidadeCadeirasC: contagem.quantidadeCadeirasC || 0,
-      quantidadeCadeirasD: contagem.quantidadeCadeirasD || 0,
-      quantidadeGaleria: contagem.quantidadeGaleria || 0,
-      quantidadeSalas: contagem.quantidadeSalas || 0,
-      quantidadeExterno: contagem.quantidadeExterno || 0,
-      quantidadeOnline: contagem.quantidadeOnline || 0,
+      turno: culto.horario === 'Manhã' ? 1 : 2,
+      liderRecepcao: culto.lider_recepcao || '',
+      quantidadePulpito: cont.pulpito || 0,
+      quantidadeCadeirasA: cadeiras.A || 0,
+      quantidadeCadeirasB: cadeiras.B || 0,
+      quantidadeCadeirasC: cadeiras.C || 0,
+      quantidadeCadeirasD: cadeiras.D || 0,
+      quantidadeGaleria: cont.galeria || 0,
+      quantidadeSalas: cont.salas || 0,
+      quantidadeExterno: cont.externo || 0,
+      quantidadeOnline: cont.online || 0,
     });
   };
 
   const salvarCulto = async () => {
     setMensagem('Salvando...');
     const dadosCulto = {
-      id: editandoId || undefined,
+      ...(editandoId && { id: editandoId }),
       data: form.data,
-      turno: form.turno,
-      liderRecepcao: form.liderRecepcao,
-      contagens: [{
-        quantidadePulpito: form.quantidadePulpito,
-        quantidadeCadeirasA: form.quantidadeCadeirasA,
-        quantidadeCadeirasB: form.quantidadeCadeirasB,
-        quantidadeCadeirasC: form.quantidadeCadeirasC,
-        quantidadeCadeirasD: form.quantidadeCadeirasD,
-        quantidadeGaleria: form.quantidadeGaleria,
-        quantidadeSalas: form.quantidadeSalas,
-        quantidadeExterno: form.quantidadeExterno,
-        quantidadeOnline: form.quantidadeOnline
-      }]
+      horario: form.turno === 1 ? 'Manhã' : 'Noite',
+      lider_recepcao: form.liderRecepcao,
+      contagens: {
+        pulpito: form.quantidadePulpito,
+        cadeiras: {
+          A: form.quantidadeCadeirasA,
+          B: form.quantidadeCadeirasB,
+          C: form.quantidadeCadeirasC,
+          D: form.quantidadeCadeirasD
+        },
+        galeria: form.quantidadeGaleria,
+        salas: form.quantidadeSalas,
+        externo: form.quantidadeExterno,
+        online: form.quantidadeOnline
+      }
     };
 
     try {
       const url = editandoId ? `http://localhost:5115/api/Cultos/${editandoId}` : 'http://localhost:5115/api/Cultos';
-      const metodo = editandoId ? 'PUT' : 'POST';
       const resposta = await fetch(url, {
-        method: metodo,
+        method: editandoId ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dadosCulto)
       });
@@ -127,8 +129,13 @@ function App() {
         limparFormulario(); 
         carregarCultos();
         setTimeout(() => setMensagem(''), 3000); 
+      } else {
+        setMensagem('Erro ao salvar. Verifique o console.');
+        console.error(await resposta.text());
       }
-    } catch { setMensagem('Erro de conexão.'); }
+    } catch { 
+      setMensagem('Erro de conexão.'); 
+    }
   };
 
   const excluirCulto = async (id: string) => {
@@ -137,6 +144,7 @@ function App() {
     try {
       const resposta = await fetch(`http://localhost:5115/api/Cultos/${id}`, { method: 'DELETE' });
       if (resposta.ok) {
+        if (editandoId === id) limparFormulario();
         carregarCultos();
       } else {
         alert('Erro ao excluir no banco de dados.');
