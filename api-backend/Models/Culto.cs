@@ -43,7 +43,7 @@ public class Culto
     [NotMapped]
     public string GrupoFormatado
     {
-        get => $"{GrupoRecepcao}ª Domingo";
+        get => Data.DayOfWeek == DayOfWeek.Saturday ? "Renove" : $"{GrupoRecepcao}ª Domingo";
         set
         {
             if (!string.IsNullOrEmpty(value))
