@@ -20,4 +20,4 @@ ENV ASPNETCORE_HTTP_PORTS=8080
 EXPOSE 8080
 
 # Comando para iniciar a sua API
-ENTRYPOINT ["dotnet", "ApiBackend.dll"]
+ENTRYPOINT ["dotnet", "apiBackend.dll"]
