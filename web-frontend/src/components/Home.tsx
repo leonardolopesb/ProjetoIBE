@@ -5,7 +5,7 @@ interface HomeProps {
   form: FormState;
   editandoId: string | null;
   listaCultos: Culto[];
-  grupoRecepcaoCalculado: number;
+  textoEscala: string;
   handleChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   setTela: (tela: 'home' | 'contagem') => void;
   prepararEdicao: (culto: Culto) => void;
@@ -17,7 +17,7 @@ export function Home({
   form,
   editandoId,
   listaCultos,
-  grupoRecepcaoCalculado,
+  textoEscala,
   handleChange,
   setTela,
   prepararEdicao,
@@ -39,23 +39,35 @@ export function Home({
           <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#555' }}>Data:</label>
           <input type="date" name="data" value={form.data} onChange={handleChange} style={{ width: '100%', padding: '12px', marginBottom: '15px', fontSize: '1rem', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #ccc' }} />
 
-          <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#555' }}>Turno:</label>
-          <select name="turno" value={form.turno} onChange={handleChange} style={{ width: '100%', padding: '12px', marginBottom: '15px', fontSize: '1rem', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #ccc' }}>
-            <option value={1}>Manhã</option>
-            <option value={2}>Noite</option>
-          </select>
+          {textoEscala !== 'Renove' && (
+            <>
+              <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#555' }}>Turno:</label>
+              <select name="turno" value={form.turno} onChange={handleChange} style={{ width: '100%', padding: '12px', marginBottom: '15px', fontSize: '1rem', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #ccc' }}>
+                <option value={1}>Manhã</option>
+                <option value={2}>Noite</option>
+              </select>
+            </>
+          )}
 
-          <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#555' }}>Líder da Recepção:</label>
-          <input type="text" name="liderRecepcao" value={form.liderRecepcao} onChange={handleChange} placeholder="" style={{ width: '100%', padding: '12px', marginBottom: '20px', fontSize: '1rem', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #ccc' }} />
+          <label style={{ fontWeight: 'bold', display: 'block', marginBottom: '5px', color: '#555' }}>
+            Líder da Recepção: <span style={{ color: 'red' }}>*</span>
+          </label>
+          <input type="text" name="liderRecepcao" value={form.liderRecepcao} onChange={handleChange} placeholder="Digite o nome do líder..." style={{ width: '100%', padding: '12px', marginBottom: '20px', fontSize: '1rem', boxSizing: 'border-box', borderRadius: '8px', border: '1px solid #ccc', borderColor: form.liderRecepcao.trim() === '' ? '#ffcccc' : '#ccc' }} />
 
           <div style={{ backgroundColor: '#F8F9FA', padding: '12px', borderRadius: '8px', textAlign: 'center', marginBottom: '25px', border: '1px solid #E9ECEF' }}>
-            <strong style={{ color: '#2a70f1' }}>Escala: {grupoRecepcaoCalculado}º Domingo</strong>
+            <strong style={{ color: '#2a70f1' }}>Escala: {textoEscala}</strong>
           </div>
 
           <div style={{ display: 'flex', gap: '10px' }}>
             <button
-              onClick={() => setTela('contagem')}
-              style={{ flex: 1, padding: '15px', backgroundColor: '#2a70f1', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1rem', boxShadow: '0 4px 10px rgba(195,0,34,0.3)' }}
+              onClick={() => {
+                if (form.liderRecepcao.trim() === '') {
+                  alert('Por favor, informe o nome do Líder da Recepção antes de iniciar a contagem.');
+                  return;
+                }
+                setTela('contagem');
+              }}
+              style={{ flex: 1, padding: '1rem', backgroundColor: '#2a70f1', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1rem', boxShadow: '0 4px 10px rgba(195,0,34,0.3)' }}
             >
               Realizar Contagem
             </button>

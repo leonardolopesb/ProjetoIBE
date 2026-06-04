@@ -25,8 +25,12 @@ function App() {
     form.quantidadeCadeirasC + form.quantidadeCadeirasD + form.quantidadeGaleria +
     form.quantidadeSalas + form.quantidadeExterno + form.quantidadeOnline;
 
+  const dataObjeto = new Date(`${form.data}T12:00:00`);
+  const ehSabado = dataObjeto.getDay() === 6;
   const diaSelecionado = parseInt(form.data.split('-')[2], 10) || 1;
-  const grupoRecepcaoCalculado = Math.floor((diaSelecionado - 1) / 7) + 1;
+
+  // Se for sábado, o texto é 'Renove'. Se não, faz a conta normal do domingo.
+  const textoEscala = ehSabado ? 'Renove' : `${Math.floor((diaSelecionado - 1) / 7) + 1}º Domingo`;
 
   const carregarCultos = async () => {
     try {
@@ -76,7 +80,7 @@ function App() {
     setEditandoId(culto.id);
     const cont = culto.contagens || {};
     const cadeiras = cont.cadeiras || {};
-    
+
     setForm({
       data: culto.data.split('T')[0],
       turno: culto.horario === 'Manhã' ? 1 : 2,
@@ -94,6 +98,12 @@ function App() {
   };
 
   const salvarCulto = async () => {
+    if (form.liderRecepcao.trim() === '') {
+      setMensagem('Erro: O nome do Líder da Recepção é obrigatório!');
+      setTimeout(() => setMensagem(''), 1000);
+      return;
+    }
+
     setMensagem('Salvando...');
     const dadosCulto = {
       ...(editandoId && { id: editandoId }),
@@ -126,21 +136,21 @@ function App() {
       if (resposta.ok) {
         setMensagem(editandoId ? 'Atualizado com sucesso!' : 'Salvo com sucesso!');
         setTela('home');
-        limparFormulario(); 
+        limparFormulario();
         carregarCultos();
-        setTimeout(() => setMensagem(''), 3000); 
+        setTimeout(() => setMensagem(''), 3000);
       } else {
         setMensagem('Erro ao salvar. Verifique o console.');
         console.error(await resposta.text());
       }
-    } catch { 
-      setMensagem('Erro de conexão.'); 
+    } catch {
+      setMensagem('Erro de conexão.');
     }
   };
 
   const excluirCulto = async (id: string) => {
     if (!window.confirm("Atenção: Excluir este registro permanentemente?")) return;
-    
+
     try {
       const resposta = await fetch(`http://localhost:5115/api/Cultos/${id}`, { method: 'DELETE' });
       if (resposta.ok) {
@@ -168,24 +178,24 @@ function App() {
       )}
 
       {tela === 'home' ? (
-        <Home 
-          form={form} 
-          editandoId={editandoId} 
-          listaCultos={listaCultos} 
-          grupoRecepcaoCalculado={grupoRecepcaoCalculado}
-          handleChange={handleChange} 
-          setTela={setTela} 
+        <Home
+          form={form}
+          editandoId={editandoId}
+          listaCultos={listaCultos}
+          textoEscala={textoEscala}
+          handleChange={handleChange}
+          setTela={setTela}
           prepararEdicao={prepararEdicao}
           limparFormulario={limparFormulario}
           excluirCulto={excluirCulto}
         />
       ) : (
-        <Contagem 
-          form={form} 
-          totalEmTempoReal={totalEmTempoReal} 
-          setTela={setTela} 
-          incrementar={incrementar} 
-          decrementar={decrementar} 
+        <Contagem
+          form={form}
+          totalEmTempoReal={totalEmTempoReal}
+          setTela={setTela}
+          incrementar={incrementar}
+          decrementar={decrementar}
           salvarCulto={salvarCulto}
           handleChange={handleChange}
         />
