@@ -34,7 +34,7 @@ function App() {
 
   const carregarCultos = async () => {
     try {
-      const resposta = await fetch('http://localhost:5115/api/Cultos');
+      const resposta = await fetch('https://projetoibe.onrender.com/api/Cultos');
       if (resposta.ok) {
         const dados: Culto[] = await resposta.json();
         setListaCultos(dados.sort((a, b) => a.data.localeCompare(b.data)));
@@ -126,7 +126,7 @@ function App() {
     };
 
     try {
-      const url = editandoId ? `http://localhost:5115/api/Cultos/${editandoId}` : 'http://localhost:5115/api/Cultos';
+      const url = editandoId ? `https://projetoibe.onrender.com/api/Cultos/${editandoId}` : 'https://projetoibe.onrender.com/api/Cultos';
       const resposta = await fetch(url, {
         method: editandoId ? 'PUT' : 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -152,7 +152,7 @@ function App() {
     if (!window.confirm("Atenção: Excluir este registro permanentemente?")) return;
 
     try {
-      const resposta = await fetch(`http://localhost:5115/api/Cultos/${id}`, { method: 'DELETE' });
+      const resposta = await fetch(`https://projetoibe.onrender.com/api/Cultos/${id}`, { method: 'DELETE' });
       if (resposta.ok) {
         if (editandoId === id) limparFormulario();
         carregarCultos();
