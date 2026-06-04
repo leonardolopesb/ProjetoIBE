@@ -3,6 +3,15 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Libera o CORS para a sua futura tela do Vercel conseguir acessar a API
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PermitirTudo", policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+});
+
 // Adiciona os serviços dos Controllers
 builder.Services.AddControllers();
 
@@ -25,6 +34,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Lê a porta que o Render fornecer
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://*:{port}");
+
 var app = builder.Build();
 
 // Ativa o Swagger apenas em ambiente de desenvolvimento
@@ -35,8 +48,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-app.UseHttpsRedirection();
-app.MapControllers();
 app.UseCors("AllowReact");
+app.UseCors("PermitirTudo");
+app.UseAuthorization();
+app.MapControllers();
 app.Run();
