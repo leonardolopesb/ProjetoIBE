@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent } from 'react';
-import type { FormState } from '../types';
+import type { Cores, FormState } from '../types';
 
 interface ContagemProps {
   form: FormState;
@@ -9,6 +9,7 @@ interface ContagemProps {
   decrementar: (campo: keyof FormState) => void;
   salvarCulto: () => void;
   handleChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  cores?: Cores;
 }
 
 export function Contagem({
@@ -42,7 +43,8 @@ export function Contagem({
   const anterior = () => { if (indiceAtual > 0) setIndiceAtual(indiceAtual - 1); };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '10vh', height: '75vh', maxWidth: '600px', margin: '0 auto', padding: '16px', boxSizing: 'border-box', fontFamily: 'sans-serif' }}>
+    // Container ocupando 100vh (tela inteira) e centralizado (maxWidth para desktop não quebrar)
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100%', maxWidth: '500px', margin: '0 auto', backgroundColor: '#FFFFFF', fontFamily: "'Inter', sans-serif", padding: '24px', boxSizing: 'border-box' }}>
       
       <style>{`
         input[type="number"]::-webkit-inner-spin-button,
@@ -50,20 +52,42 @@ export function Contagem({
         input[type="number"] { -moz-appearance: textfield; }
       `}</style>
 
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <button onClick={() => setTela('home')} style={{ padding: '10px 15px', backgroundColor: '#e2e8f0', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>Voltar</button>
-        <h2 style={{ margin: 0, color: '#0ea5e9' }}>{totalEmTempoReal}</h2>
-        <button onClick={salvarCulto} style={{ padding: '10px 20px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>Salvar</button>
+      {/* Header: Voltar, Total e Salvar */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2vh' }}>
+        <button 
+          onClick={() => setTela('home')} 
+          style={{ padding: '12px 18px', backgroundColor: '#F1F5F9', color: '#64748B', border: 'none', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem' }}>
+          Voltar
+        </button>
+        
+        <div style={{ textAlign: 'center' }}>
+          <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Total</span>
+          <h2 style={{ margin: 0, color: '#2a70f1', fontSize: '2.2rem', fontWeight: 800, lineHeight: '1' }}>{totalEmTempoReal}</h2>
+        </div>
+
+        <button 
+          onClick={salvarCulto} 
+          style={{ padding: '12px 18px', backgroundColor: '#2a70f1', color: '#FFFFFF', border: 'none', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', fontSize: '0.95rem', boxShadow: '0 4px 12px rgba(42, 112, 241, 0.3)' }}>
+          Salvar
+        </button>
       </div>
 
-      {/* Main Content (Setor, Input, Setas) */}
+      {/* Área Central: Carrossel e Input Escuro (Ocupa o espaço disponível) */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
-        <button onClick={anterior} disabled={indiceAtual === 0} style={{ position: 'absolute', left: 0, background: 'none', border: 'none', fontSize: '2.5rem', color: indiceAtual === 0 ? '#f1f5f9' : '#94a3b8' }}>←</button>
-        <button onClick={proximo} disabled={indiceAtual === totalPaginas - 1} style={{ position: 'absolute', right: 0, background: 'none', border: 'none', fontSize: '2.5rem', color: indiceAtual === totalPaginas - 1 ? '#f1f5f9' : '#94a3b8' }}>→</button>
-
-        <h3 style={{ fontSize: '2rem', color: '#1e293b', marginBottom: '15px' }}>{setorAtual.nome}</h3>
         
+        {/* Setas de navegação melhor posicionadas e maiores */}
+        <button onClick={anterior} disabled={indiceAtual === 0} style={{ position: 'absolute', left: '-10px', background: 'none', border: 'none', fontSize: '3rem', color: indiceAtual === 0 ? '#F1F5F9' : '#94A3B8', cursor: indiceAtual === 0 ? 'default' : 'pointer', transition: 'color 0.2s', padding: '20px' }}>
+          ‹
+        </button>
+        <button onClick={proximo} disabled={indiceAtual === totalPaginas - 1} style={{ position: 'absolute', right: '-10px', background: 'none', border: 'none', fontSize: '3rem', color: indiceAtual === totalPaginas - 1 ? '#F1F5F9' : '#94A3B8', cursor: indiceAtual === totalPaginas - 1 ? 'default' : 'pointer', transition: 'color 0.2s', padding: '20px' }}>
+          ›
+        </button>
+
+        <h3 style={{ fontSize: '1.5rem', color: '#0F172A', fontWeight: 800, margin: '0 0 24px 0', textTransform: 'uppercase', letterSpacing: '1px' }}>
+          {setorAtual.nome}
+        </h3>
+        
+        {/* Input Maior */}
         <input 
           type="number"
           name={setorAtual.id}
@@ -71,27 +95,29 @@ export function Contagem({
           value={form[setorAtual.id as keyof FormState] === 0 ? '' : form[setorAtual.id as keyof FormState]}
           onChange={handleChange}
           placeholder="0"
-          style={{ width: '150px', height: '90px', fontSize: '4rem', textAlign: 'center', border: '2px solid #cbd5e1', borderRadius: '12px', fontWeight: 'bold', color: '#0f172a', outlineColor: '#0ea5e9', marginBottom: '15px' }}
+          style={{ width: '200px', height: '140px', fontSize: '5rem', textAlign: 'center', backgroundColor: '#27272A', color: '#FFFFFF', border: 'none', borderRadius: '24px', fontWeight: 800, outline: 'none', boxSizing: 'border-box', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
         />
 
-        <div style={{ display: 'flex', gap: '8px' }}>
+        {/* Pontos de paginação */}
+        <div style={{ display: 'flex', gap: '8px', marginTop: '32px' }}>
           {setores.map((_, index) => (
-            <div key={index} style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: index === indiceAtual ? '#0ea5e9' : '#d0d0d0' }} />
+            <div key={index} style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: index === indiceAtual ? '#2a70f1' : '#E2E8F0', transition: 'background-color 0.3s' }} />
           ))}
         </div>
       </div>
 
-      {/* Zona Inferior de Ação Cega (Fixed Height) */}
-      <div style={{ height: '32vh', display: 'flex', gap: '16px' }}>
+      {/* Zona Inferior: Botões Gigantes (+ enorme, - compacto) */}
+      <div style={{ display: 'flex', gap: '16px', height: '35vh', minHeight: '200px', marginTop: '20px' }}>
         <button 
           onClick={() => decrementar(setorAtual.id as keyof FormState)}
-          style={{ flex: 1, backgroundColor: '#fee2e2', color: '#ef4444', border: 'none', borderRadius: '32px', fontSize: '2.5rem', fontWeight: 'bold' }}
+          style={{ width: '90px', backgroundColor: '#FEE2E2', color: '#EF4444', border: 'none', borderRadius: '24px', fontSize: '3.5rem', fontWeight: 400, cursor: 'pointer', transition: 'transform 0.1s', display: 'flex', justifyContent: 'center', alignItems: 'center', paddingBottom: '10px' }}
         >
           -
         </button> 
         <button 
           onClick={() => incrementar(setorAtual.id as keyof FormState)}
-          style={{ flex: 3, backgroundColor: '#0ea5e9', color: 'white', border: 'none', borderRadius: '32px', fontSize: '6rem', fontWeight: 'bold' }}
+          // flex: 1 faz o botão de + engolir todo o resto do espaço disponível na tela
+          style={{ flex: 1, backgroundColor: '#2a70f1', color: '#FFFFFF', border: 'none', borderRadius: '24px', fontSize: '6rem', fontWeight: 300, cursor: 'pointer', boxShadow: '0 10px 30px rgba(42, 112, 241, 0.4)', transition: 'transform 0.1s', display: 'flex', justifyContent: 'center', alignItems: 'center', paddingBottom: '15px' }}
         >
           +
         </button>
@@ -99,4 +125,4 @@ export function Contagem({
 
     </div>
   );
-}
+} 
