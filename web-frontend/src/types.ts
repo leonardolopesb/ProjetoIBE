@@ -15,6 +15,22 @@ export interface Contagem {
   total: number;
 }
 
+export interface Cores {
+  primaria: string;
+  fundo: string;
+  texto: string;
+  subtexto: string;
+  hint: string;
+  borda: string;
+  cartao: string;
+  inputFundo: string;
+  inputTexto: string;
+  botaoInativoFundo: string;
+  botaoInativoTexto: string;
+  chipFundo: string;
+  chipTexto: string;
+}
+
 export interface Culto {
   id: string;
   data: string;
