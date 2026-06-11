@@ -219,30 +219,41 @@ export function Home({
             {listaCultos.length === 0 ? (
               <p style={{ textAlign: 'center', color: cores?.hint, margin: '40px 0' }}>Nenhuma contagem salva ainda.</p>
             ) : (
-              listaCultos.map(c => (
-                <div key={c.id} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', padding: '16px', border: `1px solid ${cores?.borda}`, alignItems: 'center', backgroundColor: cores?.fundo, marginBottom: '12px', borderRadius: '12px' }}>
+              listaCultos.map(c => {
+                // Verifica se a data daquele culto específico cai no sábado
+                const isSabado = new Date(`${c.data}T12:00:00`).getDay() === 6;
 
-                  <div style={{ minWidth: '200px', marginBottom: '10px' }}>
-                    <strong style={{ fontSize: '1.1rem', color: cores?.texto }}>{c.data.split('-').reverse().join('/')}</strong> <span style={{ color: cores?.subtexto }}>- {c.horario}</span>
-                    <br />
-                    <small style={{ color: cores?.subtexto, fontSize: '0.9rem', marginTop: '4px', display: 'block' }}>
-                      Líder: {c.lider_recepcao} • Total: <strong style={{ color: cores?.primaria }}>{c.contagens?.total || 0}</strong>
-                    </small>
-                  </div>
+                return (
+                  <div key={c.id} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', padding: '16px', border: `1px solid ${cores?.borda}`, alignItems: 'center', backgroundColor: cores?.fundo, marginBottom: '12px', borderRadius: '12px' }}>
 
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button onClick={() => setCultoSelecionado(c)} style={{ padding: '8px 16px', backgroundColor: cores?.primaria, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>
-                      Ver
-                    </button>
-                    <button onClick={() => { prepararEdicao(c); setMostrarHistorico(false); }} style={{ padding: '8px 16px', backgroundColor: '#F59E0B', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>
-                      Editar
-                    </button>
-                    <button onClick={() => excluirCulto(c.id)} style={{ padding: '8px 16px', backgroundColor: '#EF4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>
-                      Excluir
-                    </button>
+                    <div style={{ minWidth: '200px', marginBottom: '10px' }}>
+                      <strong style={{ fontSize: '1.1rem', color: cores?.texto }}>{c.data.split('-').reverse().join('/')}</strong> 
+                      
+                      {/* Mostra o horário APENAS se não for sábado */}
+                      {!isSabado && (
+                        <span style={{ color: cores?.subtexto }}> - {c.horario}</span>
+                      )}
+                      
+                      <br />
+                      <small style={{ color: cores?.subtexto, fontSize: '0.9rem', marginTop: '4px', display: 'block' }}>
+                        Líder: {c.lider_recepcao} • Total: <strong style={{ color: cores?.primaria }}>{c.contagens?.total || 0}</strong>
+                      </small>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={() => setCultoSelecionado(c)} style={{ padding: '8px 16px', backgroundColor: cores?.primaria, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>
+                        Ver
+                      </button>
+                      <button onClick={() => { prepararEdicao(c); setMostrarHistorico(false); }} style={{ padding: '8px 16px', backgroundColor: '#F59E0B', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>
+                        Editar
+                      </button>
+                      <button onClick={() => excluirCulto(c.id)} style={{ padding: '8px 16px', backgroundColor: '#EF4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>
+                        Excluir
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
