@@ -26,7 +26,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Lê a porta que o Render fornecer
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5115";
 builder.WebHost.UseUrls($"http://*:{port}");
 
 var app = builder.Build();
