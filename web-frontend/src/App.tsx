@@ -2,7 +2,8 @@ import { useState, useEffect, type ChangeEvent } from 'react';
 import type { Culto, FormState, Cores } from './types';
 import { Home } from './components/Home';
 import { Contagem } from './components/Contagem';
-import { Login } from './components/Login'; // Importando a nova tela
+import { Login } from './components/Login';
+import { Usuarios } from './components/Usuarios'; // Novo Import
 
 export interface Usuario {
   username: string;
@@ -32,11 +33,9 @@ function App() {
   const [form, setForm] = useState<FormState>({
     data: dataHoje, turno: 1, liderRecepcao: '',
     quantidadePulpito: 0, quantidadeCadeirasA: 0, quantidadeCadeirasB: 0,
-    quantidadeCadeirasC: 0, quantidadeCadeirasD: 0, quantidadeGaleria: 0,
-    quantidadeSalas: 0, quantidadeExterno: 0, quantidadeOnline: 0,
+    quantidadeCadeirasC: 0, quantidadeCadeirasD: 0,
+    quantidadeGaleria: 0, quantidadeSalas: 0, quantidadeExterno: 0, quantidadeOnline: 0,
   });
-
-  const [novoUserForm, setNovoUserForm] = useState({ username: '', password: '', role: 'equipe' });
 
   const totalEmTempoReal =
     form.quantidadePulpito + form.quantidadeCadeirasA + form.quantidadeCadeirasB +
@@ -48,13 +47,9 @@ function App() {
   const diaSelecionado = parseInt(form.data.split('-')[2], 10) || 1;
   const textoEscala = ehSabado ? 'Renove' : `${Math.floor((diaSelecionado - 1) / 7) + 1}º Domingo`;
 
-  // Função aprimorada: Toast de 5 segundos
   const mostrarMensagem = (texto: string, tipo: 'sucesso' | 'erro' | 'info' = 'info') => {
     setMensagem({ texto, tipo });
-    // Some automaticamente após 5 segundos
-    setTimeout(() => {
-      setMensagem(null);
-    }, 5000); 
+    setTimeout(() => { setMensagem(null); }, 5000); 
   };
 
   const carregarCultos = async () => {
@@ -69,10 +64,10 @@ function App() {
 
   useEffect(() => {
     const inicializarDados = async () => {
-      if (usuarioLogado) carregarCultos();
+      if (usuarioLogado && tela === 'home') carregarCultos();
     };
     inicializarDados();
-  }, [usuarioLogado]);
+  }, [usuarioLogado, tela]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -119,9 +114,7 @@ function App() {
       const url = editandoId ? `https://projetoibe.onrender.com/api/Cultos/${editandoId}` : 'https://projetoibe.onrender.com/api/Cultos';
       const resposta = await fetch(url, { method: editandoId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dadosCulto) });
       if (resposta.ok) { 
-        setTela('home'); 
-        limparFormulario(); 
-        carregarCultos(); 
+        setTela('home'); limparFormulario(); carregarCultos(); 
         mostrarMensagem('Registro salvo com sucesso!', 'sucesso'); 
       }
     } catch { mostrarMensagem('Erro de conexão.', 'erro'); }
@@ -136,26 +129,6 @@ function App() {
         mostrarMensagem('Registro excluído.', 'info');
       }
     } catch { mostrarMensagem('Erro ao excluir.', 'erro'); }
-  };
-
-  const handleCriarUsuario = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const resposta = await fetch('https://projetoibe.onrender.com/api/User/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(novoUserForm)
-      });
-      if (resposta.ok) {
-        mostrarMensagem(`Usuário ${novoUserForm.username} criado com sucesso!`, 'sucesso');
-        setNovoUserForm({ username: '', password: '', role: 'equipe' });
-      } else {
-        const erros = await resposta.json();
-        mostrarMensagem('Erro ao criar: ' + (Array.isArray(erros) ? erros[0] : 'Dados inválidos'), 'erro');
-      }
-    } catch {
-      mostrarMensagem('Erro de conexão com o servidor.', 'erro');
-    }
   };
 
   const handleLoginSuccess = (usuario: Usuario) => {
@@ -180,22 +153,10 @@ function App() {
         </button>
       )}
 
-      {/* TOAST COM X E TIMER DE 5 SEGUNDOS */}
       {mensagem && (
-        <div style={{
-          position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)',
-          zIndex: 9999, padding: '12px 20px', borderRadius: '10px', fontSize: '14px',
-          backgroundColor: mensagem.tipo === 'sucesso' ? '#D1FAE5' : mensagem.tipo === 'erro' ? '#FEE2E2' : '#EFF6FF',
-          color: mensagem.tipo === 'sucesso' ? '#065F46' : mensagem.tipo === 'erro' ? '#991B1B' : '#1E293B',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', gap: '15px'
-        }}>
+        <div style={{ position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999, padding: '12px 20px', borderRadius: '10px', fontSize: '14px', backgroundColor: mensagem.tipo === 'sucesso' ? '#D1FAE5' : mensagem.tipo === 'erro' ? '#FEE2E2' : '#EFF6FF', color: mensagem.tipo === 'sucesso' ? '#065F46' : mensagem.tipo === 'erro' ? '#991B1B' : '#1E293B', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', gap: '15px' }}>
           <strong>{mensagem.texto}</strong>
-          <button 
-            onClick={() => setMensagem(null)} 
-            style={{ background: 'none', border: 'none', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', color: 'inherit', opacity: 0.6, padding: 0 }}
-          >
-            ✖
-          </button>
+          <button onClick={() => setMensagem(null)} style={{ background: 'none', border: 'none', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', color: 'inherit', opacity: 0.6, padding: 0 }}>✖</button>
         </div>
       )}
 
@@ -204,34 +165,9 @@ function App() {
         <Login cores={theme} onLoginSuccess={handleLoginSuccess} mostrarMensagem={mostrarMensagem} />
       )}
 
+      {/* Rota modularizada de Usuários */}
       {tela === 'config' && usuarioLogado && (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px' }}>
-          {/* ... O conteúdo da tela de Config continua idêntico aqui ... */}
-          <div style={{ width: '100%', maxWidth: '420px', display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-            <button onClick={() => setTela('home')} style={{ background: 'none', border: 'none', color: theme.subtexto, fontSize: '1rem', cursor: 'pointer', fontWeight: 'bold' }}>← Voltar</button>
-            <h2 style={{ margin: 0 }}>Gerenciar Usuários</h2>
-            <div style={{ width: '50px' }}></div>
-          </div>
-
-          <form onSubmit={handleCriarUsuario} style={{ width: '100%', maxWidth: '420px', backgroundColor: theme.cartao, padding: '32px', borderRadius: '16px', border: `1px solid ${theme.borda}` }}>
-            <h3 style={{ marginTop: 0, color: theme.texto }}>Novo Usuário</h3>
-            
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: theme.subtexto, marginBottom: '8px', textTransform: 'uppercase' }}>Username</label>
-            <input type="text" value={novoUserForm.username} onChange={e => setNovoUserForm({...novoUserForm, username: e.target.value})} style={{ width: '100%', padding: '14px', backgroundColor: theme.inputFundo, color: theme.inputTexto, borderRadius: '8px', border: 'none', marginBottom: '16px' }} required />
-
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: theme.subtexto, marginBottom: '8px', textTransform: 'uppercase' }}>Senha</label>
-            <input type="password" value={novoUserForm.password} onChange={e => setNovoUserForm({...novoUserForm, password: e.target.value})} style={{ width: '100%', padding: '14px', backgroundColor: theme.inputFundo, color: theme.inputTexto, borderRadius: '8px', border: 'none', marginBottom: '16px' }} required minLength={6} />
-
-            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: theme.subtexto, marginBottom: '8px', textTransform: 'uppercase' }}>Permissão</label>
-            <select value={novoUserForm.role} onChange={e => setNovoUserForm({...novoUserForm, role: e.target.value})} style={{ width: '100%', padding: '14px', backgroundColor: theme.inputFundo, color: theme.inputTexto, borderRadius: '8px', border: 'none', marginBottom: '24px' }}>
-              <option value="equipe">Equipe (Apenas Leitura)</option>
-              <option value="lider">Líder (Lançamento)</option>
-              {usuarioLogado.role === 'admin' && <option value="admin">Administrador</option>}
-            </select>
-
-            <button type="submit" style={{ width: '100%', padding: '16px', backgroundColor: theme.primaria, color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>Criar Conta</button>
-          </form>
-        </div>
+        <Usuarios cores={theme} setTela={setTela} usuarioLogado={usuarioLogado} mostrarMensagem={mostrarMensagem} />
       )}
 
       {tela === 'home' && usuarioLogado && (
