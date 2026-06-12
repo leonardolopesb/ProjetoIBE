@@ -1,9 +1,12 @@
+using FluentValidation;
 using ApiBackend.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ApiBackend.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Libera o CORS globalmente
+// 1. Libera o CORS globalmente
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -14,24 +17,60 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Adiciona os serviços dos Controllers
-builder.Services.AddControllers();
-
-// Adiciona os serviços do Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// Adiciona conexão do AppDbContext através do PostgreSQL
+// 2. Adiciona conexão do Banco de Dados PRIMEIRO
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Lê a porta que o Render fornecer
+// 3. Adiciona o Identity (Agora ele sabe que o AppDbContext já existe)
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => 
+{
+    options.Password.RequireDigit = false;
+    options.Password.RequiredLength = 8; // IMPORTANTE: Sua senha do user-secrets agora precisa ter no mínimo 8 caracteres!
+    options.Password.RequireNonAlphanumeric = false; 
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+})
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
+
+// 4. Adiciona os serviços dos Controllers e Swagger
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+// 5. Registrando os validadores do FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+// 6. Lê a porta que o Render fornecer
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5115";
 builder.WebHost.UseUrls($"http://*:{port}");
 
+// ==========================================
+// CONSTRUÇÃO DO APP
+// ==========================================
 var app = builder.Build();
 
-// Ativa o Swagger apenas em ambiente de desenvolvimento
+// 7. Chamando o Seeder para criar o Admin automaticamente
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        // 1º Aplica as migrations no banco remoto (Cria as tabelas se não existirem)
+        var db = services.GetRequiredService<AppDbContext>();
+        db.Database.Migrate();
+
+        // 2º Roda o Seeder para criar o Admin
+        await IdentitySeeder.SeedAsync(services);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Um erro ocorreu ao criar o banco ou o usuário Admin inicial.");
+    }
+}
+
+// 8. Pipeline de execução
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -40,7 +79,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowAll");
 
-app.UseHttpsRedirection();
+// Apenas redireciona para HTTPS em produção (evita avisos no localhost)
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseAuthorization();
 app.MapControllers();
 

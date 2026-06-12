@@ -4,7 +4,7 @@ import type { Cores, FormState } from '../types';
 interface ContagemProps {
   form: FormState;
   totalEmTempoReal: number;
-  setTela: (tela: 'home' | 'contagem') => void;
+  setTela: (tela: 'home' | 'contagem' | 'config' | 'login') => void;
   incrementar: (campo: keyof FormState) => void;
   decrementar: (campo: keyof FormState) => void;
   salvarCulto: () => void;
@@ -63,6 +63,10 @@ export function Contagem({
       <div style={{ display: 'flex', gap: '16px', height: '30vh', marginBottom: '20px' }}>
         <button onClick={() => decrementar(setorAtual.id as keyof FormState)} style={{ width: '80px', backgroundColor: '#FEE2E2', color: '#EF4444', border: 'none', borderRadius: '24px', fontSize: '3rem', cursor: 'pointer' }}>-</button> 
         <button onClick={() => incrementar(setorAtual.id as keyof FormState)} style={{ flex: 1, backgroundColor: cores.primaria, color: '#FFFFFF', border: 'none', borderRadius: '24px', fontSize: '5rem', cursor: 'pointer', boxShadow: `0 10px 20px ${cores.primaria}40` }}>+</button>
+      </div>
+
+      <div style={{ textAlign: 'center', color: cores.hint, fontSize: '0.75rem', fontWeight: 600, paddingBottom: '10px' }}>
+        IBE © 2026
       </div>
     </div>
   );
