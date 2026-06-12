@@ -7,11 +7,11 @@ namespace ApiBackend.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CultoController : ControllerBase
+public class CultosController : ControllerBase
 {
     private readonly AppDbContext _context;
 
-    public CultoController(AppDbContext context)
+    public CultosController(AppDbContext context)
     {
         _context = context;
     }
