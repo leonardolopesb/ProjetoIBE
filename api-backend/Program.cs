@@ -25,13 +25,23 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => 
 {
     options.Password.RequireDigit = false;
-    options.Password.RequiredLength = 8; // IMPORTANTE: Sua senha do user-secrets agora precisa ter no mínimo 8 caracteres!
+    options.Password.RequiredLength = 8;
     options.Password.RequireNonAlphanumeric = false; 
     options.Password.RequireUppercase = false;
     options.Password.RequireLowercase = false;
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
+
+// Configura o Identity para retornar erro 401 na API em vez de dar 404 procurando tela de login
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        return Task.CompletedTask;
+    };
+});
 
 // 4. Adiciona os serviços dos Controllers e Swagger
 builder.Services.AddControllers();
