@@ -1,5 +1,5 @@
 import { useState, useEffect, type ChangeEvent, type JSX } from 'react';
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import type { Culto, FormState, Cores } from './types';
 import { Home } from './components/Home';
 import { Contagem } from './components/Contagem';
@@ -20,6 +20,8 @@ const RotaProtegida = ({ children, usuarioLogado }: { children: JSX.Element, usu
 
 function App() {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const dataHoje = new Date().toISOString().split('T')[0];
 
   const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(() => {
@@ -168,9 +170,12 @@ function App() {
   return (
     <div style={{ minHeight: '100vh', backgroundColor: theme.fundo, color: theme.texto, transition: 'all 0.3s ease', position: 'relative' }}>
 
-      <button onClick={toggleTheme} style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 1000, background: theme.cartao, border: `1px solid ${theme.borda}`, borderRadius: '12px', padding: '10px', cursor: 'pointer', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
-        {isDarkMode ? '☀️' : '🌙'}
-      </button>
+      {/* Botão de tema visível apenas no Login e na Home */}
+      {(location.pathname === '/' || location.pathname === '/login') && (
+        <button onClick={toggleTheme} style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 1000, background: theme.cartao, border: `1px solid ${theme.borda}`, borderRadius: '12px', padding: '10px', cursor: 'pointer', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+          {isDarkMode ? '☀️' : '🌙'}
+        </button>
+      )}
 
       {mensagem && (
         <div style={{ position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999, padding: '12px 20px', borderRadius: '10px', fontSize: '14px', backgroundColor: mensagem.tipo === 'sucesso' ? '#D1FAE5' : mensagem.tipo === 'erro' ? '#FEE2E2' : '#EFF6FF', color: mensagem.tipo === 'sucesso' ? '#065F46' : mensagem.tipo === 'erro' ? '#991B1B' : '#1E293B', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', gap: '15px' }}>

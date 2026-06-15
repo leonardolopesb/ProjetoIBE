@@ -169,21 +169,21 @@ export function Home({ form, editandoId, listaCultos, textoEscala, handleChange,
                         Líder: {c.lider_recepcao} • Total: <strong style={{ color: cores?.primaria }}>{c.contagens?.total || 0}</strong>
                       </small>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                      {/* BOTAO VER ATUALIZADO */}
-                      <button onClick={() => setCultoSelecionado(c)} style={{ padding: '8px 16px', backgroundColor: '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>Ver</button>
-
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
+                      
+                      <button onClick={() => setCultoSelecionado(c)} style={{ padding: '8px 16px', backgroundColor: '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap' }}>Ver</button>
+                      
                       {/* EDIÇÃO DOS DADOS */}
                       {podeEditar && (
                         <>
-                          <button onClick={() => { prepararEdicao(c); setMostrarHistorico(false); }} style={{ padding: '8px 16px', backgroundColor: '#F59E0B', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>Editar</button>
-                          <button onClick={() => excluirCulto(c.id)} style={{ padding: '8px 16px', backgroundColor: '#EF4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>Excluir</button>
+                          <button onClick={() => { prepararEdicao(c); setMostrarHistorico(false); }} style={{ padding: '8px 16px', backgroundColor: '#F59E0B', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap' }}>Editar</button>
+                          <button onClick={() => excluirCulto(c.id)} style={{ padding: '8px 16px', backgroundColor: '#EF4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap' }}>Excluir</button>
                         </>
                       )}
 
                       {/* EXPORTAÇÃO DOS DADOS */}
                       {podeExportar && (
-                        <button onClick={() => exportarJson(c)} style={{ padding: '8px 12px', backgroundColor: '#10B981', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center' }} title="Exportar dados como JSON">
+                        <button onClick={() => exportarJson(c)} style={{ padding: '8px 12px', backgroundColor: '#10B981', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', whiteSpace: 'nowrap' }} title="Exportar dados como JSON">
                           📥 em JSON
                         </button>
                       )}
