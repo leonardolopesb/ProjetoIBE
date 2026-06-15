@@ -1,6 +1,6 @@
 import { type ChangeEvent, useState } from 'react';
 import type { Cores, Culto, FormState } from '../types';
-import type { Usuario } from '../App'; // Importando a tipagem
+import type { Usuario } from '../App';
 
 interface HomeProps {
   form: FormState;
@@ -14,25 +14,61 @@ interface HomeProps {
   excluirCulto: (id: string) => void;
   cores?: Cores;
   usuarioLogado: Usuario;
+  onLogout: () => void;
 }
 
-export function Home({ form, editandoId, listaCultos, textoEscala, handleChange, setTela, prepararEdicao, limparFormulario, excluirCulto, cores, usuarioLogado }: HomeProps) {
-
+export function Home({ form, editandoId, listaCultos, textoEscala, handleChange, setTela, prepararEdicao, limparFormulario, excluirCulto, cores, usuarioLogado, onLogout }: HomeProps) {
   const [mostrarHistorico, setMostrarHistorico] = useState(false);
   const [cultoSelecionado, setCultoSelecionado] = useState<Culto | null>(null);
 
+  // LÍDER DA ESCALA
   const liderPreenchido = form.liderRecepcao.trim() !== '';
+
+  // O líder da escala pode editar os dados (EXCLUIR EM BREVE ADMIN)
   const podeEditar = usuarioLogado.role === 'admin' || usuarioLogado.role === 'lider';
 
+  // O analista pode exportar os dados (EXCLUIR EM BREVE ADMIN)
+  const podeExportar = usuarioLogado.role === 'admin' || usuarioLogado.role === 'analista';
+
+  // em JSON
+  const exportarJson = (culto: Culto) => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(culto, null, 2));
+
+    // "dd-mm-yyyy...
+    const [ano, mes, dia] = culto.data.split('-');
+    const dataFormatada = `${dia}-${mes}-${ano}`;
+
+    // ...manha/noite/renove"
+    const isSabado = new Date(`${culto.data}T12:00:00`).getDay() === 6;
+    let turnoStr = '';
+    if (isSabado) {
+      turnoStr = 'renove';
+    } else {
+      // Verifica se existe a palavra 'manhã' ou similar, caso contrário, assume 'noite'
+      turnoStr = culto.horario?.toLowerCase().includes('manh') ? 'manha' : 'noite';
+    }
+
+    const nomeArquivo = `culto-${dataFormatada}-${turnoStr}.json`;
+
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", nomeArquivo);
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  };
+
+  // DOMINGO: Manhã/Noite
   const alterarTurno = (valor: number) => {
     handleChange({ target: { name: 'turno', value: valor.toString(), type: 'select-one' } } as unknown as ChangeEvent<HTMLSelectElement>);
   };
 
+  // Escolha de data (sábado ou domingo)
   const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
     const dataSelecionada = new Date(`${e.target.value}T12:00:00`);
     const diaDaSemana = dataSelecionada.getDay();
     if (diaDaSemana !== 0 && diaDaSemana !== 6) {
-      alert('Por favor, selecione apenas sábados ou domingos para o registro.');
+      alert('Selecione somente sábados ou domingos.');
       return;
     }
     handleChange(e);
@@ -41,104 +77,115 @@ export function Home({ form, editandoId, listaCultos, textoEscala, handleChange,
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', backgroundColor: cores?.fundo, fontFamily: "'Inter', sans-serif", padding: '20px', position: 'relative', overflow: 'hidden', transition: 'background-color 0.3s' }}>
 
-      {/* Header com Logout e Config */}
+      {/* HEADER */}
       <div style={{ position: 'absolute', top: '20px', left: '20px', display: 'flex', gap: '10px', zIndex: 10 }}>
-        <button onClick={() => setTela('login')} style={{ background: cores?.cartao, border: `1px solid ${cores?.borda}`, color: cores?.texto, padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+        <button onClick={() => { onLogout(); setTela('login'); }} style={{ background: cores?.cartao, border: `1px solid ${cores?.borda}`, color: cores?.texto, padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
           Sair
         </button>
         {podeEditar && (
           <button onClick={() => setTela('config')} style={{ background: cores?.primaria, border: 'none', color: '#fff', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
-            ⚙️ Usuários
+            Usuários
           </button>
         )}
       </div>
 
+      {/* TÍTULO */}
       <div style={{ width: '100%', maxWidth: '420px', textAlign: 'center', marginBottom: '2rem', zIndex: 1 }}>
         <h1 style={{ color: cores?.texto, fontSize: '2rem', fontWeight: 700, transition: 'color 0.3s' }}>
           Recepção - IBE
         </h1>
       </div>
 
-      {/* Se for EQUIPE, não renderiza o formulário de cadastro, apenas uma mensagem */}
-      {!podeEditar ? (
-        <div style={{ width: '100%', maxWidth: '420px', backgroundColor: cores?.cartao, borderRadius: '16px', padding: '32px', textAlign: 'center', border: `1px solid ${cores?.borda}`, zIndex: 1 }}>
-          <h3 style={{ color: cores?.texto }}>Modo Leitura 📖</h3>
-          <p style={{ color: cores?.subtexto }}>A sua conta permite visualizar o histórico de cultos. Utilize o botão inferior para acessar os dados.</p>
-        </div>
-      ) : (
-        <div style={{ width: '100%', maxWidth: '420px', backgroundColor: cores?.cartao, borderRadius: '16px', padding: '32px', boxSizing: 'border-box', border: `1px solid ${cores?.borda}`, boxShadow: '0 10px 30px rgba(0,0,0,0.05)', position: 'relative', zIndex: 1, transition: 'all 0.3s' }}>
-          
-          {editandoId && <h3 style={{ textAlign: 'center', marginTop: 0, marginBottom: '25px', color: '#d39e00', fontSize: '1.2rem' }}>Editando Culto</h3>}
+      {/* CARD */}
+      <div style={{ width: '100%', maxWidth: '420px', backgroundColor: cores?.cartao, borderRadius: '16px', padding: '32px', boxSizing: 'border-box', border: `1px solid ${cores?.borda}`, boxShadow: '0 10px 30px rgba(0,0,0,0.05)', position: 'relative', zIndex: 1, transition: 'all 0.3s' }}>
 
+        {/* EDIÇÃO */}
+        {editandoId && <h3 style={{ textAlign: 'center', marginTop: 0, marginBottom: '25px', color: '#d39e00', fontSize: '1.2rem' }}>Modo de edição</h3>}
+
+        {/* DATA */}
+        <div style={{ marginBottom: '48px' }}>
+          <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', fontWeight: 700, color: cores?.subtexto, marginBottom: '8px', textTransform: 'uppercase' }}>
+            <span>Data</span>
+          </label>
+          <input type="date" name="data" value={form.data} onChange={handleDateChange} style={{ width: '100%', padding: '14px 16px', backgroundColor: cores?.inputFundo, color: cores?.inputTexto, borderRadius: '8px', border: 'none', fontSize: '1rem', outline: 'none', colorScheme: cores?.fundo ? 'dark' : 'light' }} />
+        </div>
+
+        {/* TURNO (se for domingo) */}
+        {textoEscala !== 'Renove' && (
           <div style={{ marginBottom: '48px' }}>
-            <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', fontWeight: 700, color: cores?.subtexto, marginBottom: '8px', textTransform: 'uppercase' }}>
-              <span>Data</span>
-            </label>
-            <input type="date" name="data" value={form.data} onChange={handleDateChange} style={{ width: '100%', padding: '14px 16px', backgroundColor: cores?.inputFundo, color: cores?.inputTexto, borderRadius: '8px', border: 'none', fontSize: '1rem', outline: 'none', colorScheme: cores?.fundo ? 'dark' : 'light' }} />
-          </div>
-
-          {textoEscala !== 'Renove' && (
-            <div style={{ marginBottom: '48px' }}>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: cores?.subtexto, marginBottom: '8px', textTransform: 'uppercase' }}>Turno</label>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button type="button" onClick={() => alterarTurno(1)} style={{ flex: 1, padding: '16px', borderRadius: '8px', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', backgroundColor: form.turno === 1 ? cores?.inputFundo : 'transparent', color: form.turno === 1 ? cores?.inputTexto : cores?.texto, border: form.turno === 1 ? 'none' : `1px solid ${cores?.borda}` }}>Manhã</button>
-                <button type="button" onClick={() => alterarTurno(2)} style={{ flex: 1, padding: '16px', borderRadius: '8px', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', backgroundColor: form.turno === 2 ? cores?.inputFundo : 'transparent', color: form.turno === 2 ? cores?.inputTexto : cores?.texto, border: form.turno === 2 ? 'none' : `1px solid ${cores?.borda}` }}>Noite</button>
-              </div>
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: cores?.subtexto, marginBottom: '8px', textTransform: 'uppercase' }}>Turno</label>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button type="button" onClick={() => alterarTurno(1)} style={{ flex: 1, padding: '16px', borderRadius: '8px', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', backgroundColor: form.turno === 1 ? cores?.inputFundo : 'transparent', color: form.turno === 1 ? cores?.inputTexto : cores?.texto, border: form.turno === 1 ? 'none' : `1px solid ${cores?.borda}` }}>Manhã</button>
+              <button type="button" onClick={() => alterarTurno(2)} style={{ flex: 1, padding: '16px', borderRadius: '8px', fontSize: '1rem', fontWeight: 600, cursor: 'pointer', backgroundColor: form.turno === 2 ? cores?.inputFundo : 'transparent', color: form.turno === 2 ? cores?.inputTexto : cores?.texto, border: form.turno === 2 ? 'none' : `1px solid ${cores?.borda}` }}>Noite</button>
             </div>
-          )}
-
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: cores?.subtexto, marginBottom: '8px', textTransform: 'uppercase' }}>Líder da Recepção</label>
-            <input type="text" name="liderRecepcao" value={form.liderRecepcao} onChange={handleChange} placeholder="Nome do líder..." style={{ width: '100%', padding: '14px 16px', backgroundColor: cores?.inputFundo, color: cores?.inputTexto, borderRadius: '8px', fontSize: '1rem', outline: 'none', border: !liderPreenchido ? '1px solid #ffcccc' : '1px solid transparent' }} />
           </div>
+        )}
 
-          <div style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: cores?.chipFundo, padding: '12px', borderRadius: '999px', marginBottom: '32px' }}>
-            <div style={{ width: '6px', height: '6px', backgroundColor: cores?.primaria, borderRadius: '50%', marginRight: '8px' }}></div>
-            <span style={{ color: cores?.chipTexto, fontSize: '0.9rem', fontWeight: 600 }}>{textoEscala}</span>
-          </div>
-
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button onClick={() => { if (!liderPreenchido) { alert('Informe o nome do Líder.'); return; } setTela('contagem'); }} disabled={!liderPreenchido} style={{ flex: 1, padding: '16px', borderRadius: '8px', fontWeight: 700, fontSize: '1rem', cursor: liderPreenchido ? 'pointer' : 'default', backgroundColor: liderPreenchido ? cores?.primaria : cores?.botaoInativoFundo, color: liderPreenchido ? '#FFFFFF' : cores?.botaoInativoTexto, border: liderPreenchido ? 'none' : `1px solid ${cores?.borda}` }}>
-              Realizar contagem
-            </button>
-            {editandoId && <button onClick={limparFormulario} style={{ padding: '16px 20px', backgroundColor: cores?.subtexto, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>✖</button>}
-          </div>
+        {/* LÍDER DA ESCALA */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: cores?.subtexto, marginBottom: '8px', textTransform: 'uppercase' }}>Líder da Recepção</label>
+          <input type="text" name="liderRecepcao" value={form.liderRecepcao} onChange={handleChange} placeholder="Nome do líder..." style={{ width: '100%', padding: '14px 16px', backgroundColor: cores?.inputFundo, color: cores?.inputTexto, borderRadius: '8px', fontSize: '1rem', outline: 'none', border: !liderPreenchido ? '1px solid #ffcccc' : '1px solid transparent' }} />
         </div>
-      )}
-      
+
+        {/* ESCALA */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', backgroundColor: cores?.chipFundo, padding: '12px', borderRadius: '999px', marginBottom: '32px' }}>
+          <div style={{ width: '6px', height: '6px', backgroundColor: cores?.primaria, borderRadius: '50%', marginRight: '8px' }}></div>
+          <span style={{ color: cores?.chipTexto, fontSize: '0.9rem', fontWeight: 600 }}>{textoEscala}</span>
+        </div>
+
+        {/* BOTÃO DE AÇÃO */}
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={() => { if (!liderPreenchido) { alert('Informe o nome do Líder da Escala!'); return; } setTela('contagem'); }} disabled={!liderPreenchido} style={{ flex: 1, padding: '16px', borderRadius: '8px', fontWeight: 700, fontSize: '1rem', cursor: liderPreenchido ? 'pointer' : 'default', backgroundColor: liderPreenchido ? cores?.primaria : cores?.botaoInativoFundo, color: liderPreenchido ? '#FFFFFF' : cores?.botaoInativoTexto, border: liderPreenchido ? 'none' : `1px solid ${cores?.borda}` }}>
+            Realizar contagem
+          </button>
+          {editandoId && <button onClick={limparFormulario} style={{ padding: '16px 20px', backgroundColor: cores?.subtexto, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>✖</button>}
+        </div>
+      </div>
+
+      {/* COPYRIGHT*/}
       <div style={{ marginTop: '30px', color: cores?.hint, fontSize: '0.8rem', fontWeight: 600, letterSpacing: '0.5px', zIndex: 1 }}>
         Igreja Batista Emanuel em Boa Viagem © 2026
       </div>
 
+      {/* BOTÃO FLUTUANTE DO HISTÓRICO */}
       <button onClick={() => setMostrarHistorico(true)} style={{ position: 'fixed', bottom: '40px', right: '40px', width: '56px', height: '56px', borderRadius: '16px', backgroundColor: cores?.cartao, border: `1px solid ${cores?.borda}`, color: cores?.texto, boxShadow: '0 8px 24px rgba(0,0,0,0.06)', cursor: 'pointer', fontSize: '24px', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 999 }}>📋</button>
 
+      {/* HISTÓRICO */}
       {mostrarHistorico && (
         <div onClick={() => setMostrarHistorico(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000, padding: '20px' }}>
           <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: cores?.cartao, padding: '30px', borderRadius: '20px', width: '100%', maxWidth: '650px', maxHeight: '85vh', overflowY: 'auto', position: 'relative', border: `1px solid ${cores?.borda}` }}>
             <button onClick={() => setMostrarHistorico(false)} style={{ position: 'absolute', top: '20px', right: '20px', background: cores?.chipFundo, color: cores?.subtexto, border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', fontWeight: 'bold' }}>✖</button>
             <h3 style={{ marginTop: 0, marginBottom: '25px', textAlign: 'center', fontSize: '1.4rem', color: cores?.texto, fontWeight: 700 }}>Histórico de Lançamentos</h3>
-            {listaCultos.length === 0 ? ( <p style={{ textAlign: 'center', color: cores?.hint, margin: '40px 0' }}>Nenhuma contagem salva ainda.</p>
+            {listaCultos.length === 0 ? (<p style={{ textAlign: 'center', color: cores?.hint, margin: '40px 0' }}>Nenhuma contagem salva ainda.</p>
             ) : (
               listaCultos.map(c => {
                 const isSabado = new Date(`${c.data}T12:00:00`).getDay() === 6;
                 return (
                   <div key={c.id} style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', padding: '16px', border: `1px solid ${cores?.borda}`, alignItems: 'center', backgroundColor: cores?.fundo, marginBottom: '12px', borderRadius: '12px' }}>
                     <div style={{ minWidth: '200px', marginBottom: '10px' }}>
-                      <strong style={{ fontSize: '1.1rem', color: cores?.texto }}>{c.data.split('-').reverse().join('/')}</strong> 
+                      <strong style={{ fontSize: '1.1rem', color: cores?.texto }}>{c.data.split('-').reverse().join('/')}</strong>
                       <span style={{ color: cores?.subtexto }}>{isSabado ? ' - Renove' : ` - ${c.horario}`}</span><br />
                       <small style={{ color: cores?.subtexto, fontSize: '0.9rem', marginTop: '4px', display: 'block' }}>
                         Líder: {c.lider_recepcao} • Total: <strong style={{ color: cores?.primaria }}>{c.contagens?.total || 0}</strong>
                       </small>
                     </div>
                     <div style={{ display: 'flex', gap: '8px' }}>
-                      <button onClick={() => setCultoSelecionado(c)} style={{ padding: '8px 16px', backgroundColor: cores?.primaria, color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>Ver</button>
-                      
-                      {/* BOTOES CONDICIONADOS A QUEM TEM PERMISSÃO */}
+                      {/* BOTAO VER ATUALIZADO */}
+                      <button onClick={() => setCultoSelecionado(c)} style={{ padding: '8px 16px', backgroundColor: '#3B82F6', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>Ver</button>
+
+                      {/* EDIÇÃO DOS DADOS */}
                       {podeEditar && (
                         <>
                           <button onClick={() => { prepararEdicao(c); setMostrarHistorico(false); }} style={{ padding: '8px 16px', backgroundColor: '#F59E0B', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>Editar</button>
                           <button onClick={() => excluirCulto(c.id)} style={{ padding: '8px 16px', backgroundColor: '#EF4444', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem' }}>Excluir</button>
                         </>
+                      )}
+
+                      {/* EXPORTAÇÃO DOS DADOS */}
+                      {podeExportar && (
+                        <button onClick={() => exportarJson(c)} style={{ padding: '8px 12px', backgroundColor: '#10B981', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center' }} title="Exportar dados como JSON">
+                          📥 em JSON
+                        </button>
                       )}
                     </div>
                   </div>
@@ -149,12 +196,12 @@ export function Home({ form, editandoId, listaCultos, textoEscala, handleChange,
         </div>
       )}
 
+      {/* VER CULTO (a partir do histórico)*/}
       {cultoSelecionado && (
         <div onClick={() => setCultoSelecionado(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1001, padding: '20px' }}>
           <div onClick={(e) => e.stopPropagation()} style={{ backgroundColor: cores?.cartao, padding: '32px', borderRadius: '20px', width: '100%', maxWidth: '400px', position: 'relative', border: `1px solid ${cores?.borda}` }}>
             <button onClick={() => setCultoSelecionado(null)} style={{ position: 'absolute', top: '20px', right: '20px', background: cores?.chipFundo, color: cores?.subtexto, border: 'none', borderRadius: '50%', width: '32px', height: '32px', cursor: 'pointer', fontWeight: 'bold' }}>✖</button>
             <h3 style={{ marginTop: 0, marginBottom: '24px', textAlign: 'center', color: cores?.texto, fontSize: '1.3rem', fontWeight: 700 }}>Dados da Contagem</h3>
-            {/* O Grid permanece o mesmo */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', fontSize: '1rem', color: cores?.subtexto }}>
               <div>Púlpito: <strong style={{ color: cores?.texto }}>{cultoSelecionado.contagens?.pulpito || 0}</strong></div><div>Cadeiras A: <strong style={{ color: cores?.texto }}>{cultoSelecionado.contagens?.cadeiras?.A || 0}</strong></div><div>Cadeiras B: <strong style={{ color: cores?.texto }}>{cultoSelecionado.contagens?.cadeiras?.B || 0}</strong></div><div>Cadeiras C: <strong style={{ color: cores?.texto }}>{cultoSelecionado.contagens?.cadeiras?.C || 0}</strong></div><div>Cadeiras D: <strong style={{ color: cores?.texto }}>{cultoSelecionado.contagens?.cadeiras?.D || 0}</strong></div><div>Galeria: <strong style={{ color: cores?.texto }}>{cultoSelecionado.contagens?.galeria || 0}</strong></div><div>Salas: <strong style={{ color: cores?.texto }}>{cultoSelecionado.contagens?.salas || 0}</strong></div><div>Externo: <strong style={{ color: cores?.texto }}>{cultoSelecionado.contagens?.externo || 0}</strong></div><div>Online: <strong style={{ color: cores?.texto }}>{cultoSelecionado.contagens?.online || 0}</strong></div>
             </div>

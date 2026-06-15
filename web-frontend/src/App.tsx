@@ -1,21 +1,32 @@
-import { useState, useEffect, type ChangeEvent } from 'react';
+import { useState, useEffect, type ChangeEvent, type JSX } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import type { Culto, FormState, Cores } from './types';
 import { Home } from './components/Home';
 import { Contagem } from './components/Contagem';
 import { Login } from './components/Login';
-import { Usuarios } from './components/Usuarios'; // Novo Import
+import { Usuarios } from './components/Usuarios';
 
 export interface Usuario {
   username: string;
-  role: 'admin' | 'lider' | 'equipe';
+  role: 'admin' | 'analista' | 'lider';
 }
 
+const RotaProtegida = ({ children, usuarioLogado }: { children: JSX.Element, usuarioLogado: Usuario | null }) => {
+  if (!usuarioLogado) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
 function App() {
+  const navigate = useNavigate();
   const dataHoje = new Date().toISOString().split('T')[0];
 
-  const [tela, setTela] = useState<'login' | 'home' | 'contagem' | 'config'>('login');
-  const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(null);
-  
+  const [usuarioLogado, setUsuarioLogado] = useState<Usuario | null>(() => {
+    const usuarioSalvo = localStorage.getItem('usuario_sessao');
+    return usuarioSalvo ? JSON.parse(usuarioSalvo) : null;
+  });
+
   const [editandoId, setEditandoId] = useState<string | null>(null);
   const [listaCultos, setListaCultos] = useState<Culto[]>([]);
   const [mensagem, setMensagem] = useState<{ texto: string; tipo: 'sucesso' | 'erro' | 'info' } | null>(null);
@@ -49,7 +60,14 @@ function App() {
 
   const mostrarMensagem = (texto: string, tipo: 'sucesso' | 'erro' | 'info' = 'info') => {
     setMensagem({ texto, tipo });
-    setTimeout(() => { setMensagem(null); }, 5000); 
+    setTimeout(() => { setMensagem(null); }, 5000);
+  };
+
+  const setTela = (tela: 'login' | 'home' | 'contagem' | 'config') => {
+    if (tela === 'login') navigate('/login');
+    else if (tela === 'home') navigate('/');
+    else if (tela === 'contagem') navigate('/contagem');
+    else if (tela === 'config') navigate('/usuarios');
   };
 
   const carregarCultos = async () => {
@@ -64,10 +82,10 @@ function App() {
 
   useEffect(() => {
     const inicializarDados = async () => {
-      if (usuarioLogado && tela === 'home') carregarCultos();
+      if (usuarioLogado && window.location.pathname === '/') carregarCultos();
     };
     inicializarDados();
-  }, [usuarioLogado, tela]);
+  }, [usuarioLogado]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -113,9 +131,11 @@ function App() {
     try {
       const url = editandoId ? `https://projetoibe.onrender.com/api/Cultos/${editandoId}` : 'https://projetoibe.onrender.com/api/Cultos';
       const resposta = await fetch(url, { method: editandoId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dadosCulto) });
-      if (resposta.ok) { 
-        setTela('home'); limparFormulario(); carregarCultos(); 
-        mostrarMensagem('Registro salvo com sucesso!', 'sucesso'); 
+      if (resposta.ok) {
+        navigate('/');
+        limparFormulario();
+        carregarCultos();
+        mostrarMensagem('Registro salvo com sucesso!', 'sucesso');
       }
     } catch { mostrarMensagem('Erro de conexão.', 'erro'); }
   };
@@ -132,8 +152,9 @@ function App() {
   };
 
   const handleLoginSuccess = (usuario: Usuario) => {
+    localStorage.setItem('usuario_sessao', JSON.stringify(usuario));
     setUsuarioLogado(usuario);
-    setTela('home');
+    navigate('/');
   };
 
   const theme: Cores = {
@@ -142,16 +163,14 @@ function App() {
     cartao: isDarkMode ? '#1E293B' : '#FFFFFF', inputFundo: isDarkMode ? '#111827' : '#27272A', inputTexto: '#FFFFFF',
     botaoInativoFundo: isDarkMode ? '#1E293B' : '#F1F5F9', botaoInativoTexto: isDarkMode ? '#475569' : '#94A3B8',
     chipFundo: isDarkMode ? '#111827' : '#F1F5F9', chipTexto: isDarkMode ? '#F8FAFC' : '#1E293B',
-  };  
+  };
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: theme.fundo, color: theme.texto, transition: 'all 0.3s ease', position: 'relative' }}>
-      
-      {(tela === 'home' || tela === 'login') && (
-        <button onClick={toggleTheme} style={{ position: 'fixed', top: '20px', right : '20px', zIndex: 1000, background: theme.cartao, border: `1px solid ${theme.borda}`, borderRadius: '12px', padding: '10px', cursor: 'pointer', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
-          {isDarkMode ? '☀️' : '🌙'}
-        </button>
-      )}
+
+      <button onClick={toggleTheme} style={{ position: 'fixed', top: '20px', right: '20px', zIndex: 1000, background: theme.cartao, border: `1px solid ${theme.borda}`, borderRadius: '12px', padding: '10px', cursor: 'pointer', fontSize: '1.2rem', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
+        {isDarkMode ? '☀️' : '🌙'}
+      </button>
 
       {mensagem && (
         <div style={{ position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 9999, padding: '12px 20px', borderRadius: '10px', fontSize: '14px', backgroundColor: mensagem.tipo === 'sucesso' ? '#D1FAE5' : mensagem.tipo === 'erro' ? '#FEE2E2' : '#EFF6FF', color: mensagem.tipo === 'sucesso' ? '#065F46' : mensagem.tipo === 'erro' ? '#991B1B' : '#1E293B', boxShadow: '0 4px 20px rgba(0,0,0,0.15)', display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -160,22 +179,74 @@ function App() {
         </div>
       )}
 
-      {/* ROTEAMENTO DE TELAS */}
-      {tela === 'login' && (
-        <Login cores={theme} onLoginSuccess={handleLoginSuccess} mostrarMensagem={mostrarMensagem} />
-      )}
+      {/* ROTEAMENTO */}
+      <Routes>
+        <Route path="/login" element={
+          usuarioLogado ? <Navigate to="/" replace /> : <Login cores={theme} onLoginSuccess={handleLoginSuccess} mostrarMensagem={mostrarMensagem} />
+        } />
 
-      {/* Rota modularizada de Usuários */}
-      {tela === 'config' && usuarioLogado && (
-        <Usuarios cores={theme} setTela={setTela} usuarioLogado={usuarioLogado} mostrarMensagem={mostrarMensagem} />
-      )}
+        {/* TELA INICIAL */}
+        <Route path="/" element={
+          <RotaProtegida usuarioLogado={usuarioLogado}>
+            <Home
+              form={form}
+              editandoId={editandoId}
+              listaCultos={listaCultos}
+              textoEscala={textoEscala}
+              handleChange={handleChange}
+              setTela={setTela}
+              prepararEdicao={prepararEdicao}
+              limparFormulario={limparFormulario}
+              excluirCulto={excluirCulto}
+              cores={theme}
+              usuarioLogado={usuarioLogado!}
+              onLogout={() => {
+                localStorage.removeItem('usuario_sessao');
+                setUsuarioLogado(null);
+              }}
+            />
+          </RotaProtegida>
+        } />
 
-      {tela === 'home' && usuarioLogado && (
-        <Home form={form} editandoId={editandoId} listaCultos={listaCultos} textoEscala={textoEscala} handleChange={handleChange} setTela={setTela} prepararEdicao={prepararEdicao} limparFormulario={limparFormulario} excluirCulto={excluirCulto} cores={theme} usuarioLogado={usuarioLogado} />
-      )}
-      {tela === 'contagem' && usuarioLogado && (
-        <Contagem form={form} totalEmTempoReal={totalEmTempoReal} setTela={setTela} incrementar={incrementar} decrementar={decrementar} salvarCulto={salvarCulto} handleChange={handleChange} cores={theme} />
-      )}
+        {/* TELA DE CONTAGEM */}
+        <Route path="/contagem" element={
+          <RotaProtegida usuarioLogado={usuarioLogado}>
+            <Contagem
+              form={form}
+              totalEmTempoReal={totalEmTempoReal}
+              setTela={setTela}
+              incrementar={incrementar}
+              decrementar={decrementar}
+              salvarCulto={salvarCulto}
+              handleChange={handleChange}
+              cores={theme}
+            />
+          </RotaProtegida>
+        } />
+
+        {/* TELA DE USUÁRIOS (CRUD) */}
+        <Route path="/usuarios" element={
+          <RotaProtegida usuarioLogado={usuarioLogado}>
+            {usuarioLogado?.role === 'admin' ? (
+              <Usuarios
+                cores={theme}
+                setTela={setTela}
+                usuarioLogado={usuarioLogado}
+                mostrarMensagem={mostrarMensagem}
+              />
+            ) : (
+              <Navigate to="/" replace />
+            )}
+          </RotaProtegida>
+        } />
+
+        {/* Se digitar qualquer URL que não existe, manda pro início */}
+        <Route path="*" element={
+          usuarioLogado ? <Navigate to="/" replace /> : <Navigate to="/login" replace />
+        } />
+
+      </Routes>
+
     </div>
   );
 }
