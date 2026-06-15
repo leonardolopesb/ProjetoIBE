@@ -14,7 +14,7 @@ public static class IdentitySeeder
         var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("IdentitySeeder");
 
         // Roles do nível de acesso
-        string[] roles = { "Admin", "Lider", "Equipe" };
+        string[] roles = { "Admin", "Analista", "Lider" };
         foreach (var r in roles)
         {
             if (!await roleManager.RoleExistsAsync(r))

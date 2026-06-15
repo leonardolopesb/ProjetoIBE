@@ -11,7 +11,7 @@ interface UsuariosProps {
 
 export function Usuarios({ cores, setTela, usuarioLogado, mostrarMensagem }: UsuariosProps) {
   const [listaUsuarios, setListaUsuarios] = useState<{ id: string; username: string; role: string }[]>([]);
-  const [novoUserForm, setNovoUserForm] = useState({ username: '', password: '', role: 'equipe' });
+  const [novoUserForm, setNovoUserForm] = useState({ username: '', password: '', role: 'analista' });
 
   const carregarUsuarios = async () => {
     try {
@@ -96,8 +96,8 @@ export function Usuarios({ cores, setTela, usuarioLogado, mostrarMensagem }: Usu
 
         <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: cores.subtexto, marginBottom: '8px', textTransform: 'uppercase' }}>Permissão</label>
         <select value={novoUserForm.role} onChange={e => setNovoUserForm({...novoUserForm, role: e.target.value})} style={{ width: '100%', padding: '14px', backgroundColor: cores.inputFundo, color: cores.inputTexto, borderRadius: '8px', border: 'none', marginBottom: '24px' }}>
-          <option value="equipe">Equipe (Apenas Leitura)</option>
-          <option value="lider">Líder (Lançamento)</option>
+          <option value="analista">Analista de Dados</option>
+          <option value="lider">Líder de Escala</option>
           {usuarioLogado.role === 'admin' && <option value="admin">Administrador</option>}
         </select>
 
