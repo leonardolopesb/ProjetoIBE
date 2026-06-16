@@ -24,11 +24,11 @@ export function Home({ form, editandoId, listaCultos, textoEscala, handleChange,
   // LÍDER DA ESCALA
   const liderPreenchido = form.liderRecepcao.trim() !== '';
 
-  // O líder da escala pode editar os dados (EXCLUIR EM BREVE ADMIN)
-  const podeEditar = usuarioLogado.role === 'admin' || usuarioLogado.role === 'lider';
+  // O líder da escala pode editar os dados
+  const podeEditar = usuarioLogado.role === 'lider';
 
-  // O analista pode exportar os dados (EXCLUIR EM BREVE ADMIN)
-  const podeExportar = usuarioLogado.role === 'admin' || usuarioLogado.role === 'analista';
+  // O analista pode exportar os dados
+  const podeExportar = usuarioLogado.role === 'analista';
 
   // em JSON
   const exportarJson = (culto: Culto) => {
@@ -58,7 +58,7 @@ export function Home({ form, editandoId, listaCultos, textoEscala, handleChange,
     downloadAnchorNode.remove();
   };
 
-  // DOMINGO: Manhã/Noite
+  // TURNO DE DOMINGO: Manhã/Noite
   const alterarTurno = (valor: number) => {
     handleChange({ target: { name: 'turno', value: valor.toString(), type: 'select-one' } } as unknown as ChangeEvent<HTMLSelectElement>);
   };
