@@ -13,7 +13,7 @@ public class UpdateUserValidator : AbstractValidator<UpdateUserDto>
         RuleFor(x => x.Role)
             .Must(r => r.Equals("admin", StringComparison.OrdinalIgnoreCase) || 
                        r.Equals("lider", StringComparison.OrdinalIgnoreCase) || 
-                       r.Equals("equipe", StringComparison.OrdinalIgnoreCase))
-            .WithMessage("O nível de acesso deve ser Admin, Lider ou Equipe.");
+                       r.Equals("analista", StringComparison.OrdinalIgnoreCase))
+            .WithMessage("O nível de acesso deve ser Admin, Lider ou Analista.");
     }
 }

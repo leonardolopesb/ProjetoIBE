@@ -15,7 +15,7 @@ public class UserController : ControllerBase
     private readonly IValidator<UpdateUserDto> _updateValidator;
 
     public UserController(
-        UserManager<IdentityUser> userManager, 
+        UserManager<IdentityUser> userManager,
         IValidator<CreateUserDto> createValidator,
         IValidator<UpdateUserDto> updateValidator)
     {
@@ -24,20 +24,19 @@ public class UserController : ControllerBase
         _updateValidator = updateValidator;
     }
 
-    // 1. LOGIN
     [HttpPost("login")]
     [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
         var user = await _userManager.FindByNameAsync(dto.Username);
-        
+
         if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
         {
             return Unauthorized(new { message = "Usuário ou senha inválidos." });
         }
 
         var roles = await _userManager.GetRolesAsync(user);
-        var userRole = roles.FirstOrDefault()?.ToLower() ?? "equipe";
+        var userRole = roles.FirstOrDefault()?.ToLower() ?? "analista";
 
         return Ok(new
         {
@@ -47,7 +46,6 @@ public class UserController : ControllerBase
         });
     }
 
-    // 2. CREATE (POST)
     [HttpPost("create")]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserDto dto)
     {
@@ -56,6 +54,12 @@ public class UserController : ControllerBase
 
         var existingUser = await _userManager.FindByNameAsync(dto.Username);
         if (existingUser != null) return BadRequest(new[] { "Este nome de usuário já está em uso." });
+
+        var roleValida = dto.Role.ToLower();
+        if (roleValida != "admin" && roleValida != "lider" && roleValida != "analista")
+        {
+            return BadRequest(new[] { "O nível de acesso deve ser Admin, Lider ou Analista." });
+        }
 
         var newUser = new IdentityUser
         {
@@ -73,7 +77,6 @@ public class UserController : ControllerBase
         return Ok(new { message = $"Usuário {dto.Username} criado com sucesso!" });
     }
 
-    // 3. READ ALL (GET)
     [HttpGet]
     public async Task<IActionResult> GetAllUsers()
     {
@@ -87,14 +90,13 @@ public class UserController : ControllerBase
             {
                 id = user.Id,
                 username = user.UserName,
-                role = roles.FirstOrDefault()?.ToLower() ?? "equipe"
+                role = roles.FirstOrDefault()?.ToLower() ?? "analista"
             });
         }
 
         return Ok(userList);
     }
 
-    // 4. READ BY ID (GET)
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUserById(string id)
     {
@@ -106,11 +108,25 @@ public class UserController : ControllerBase
         {
             id = user.Id,
             username = user.UserName,
-            role = roles.FirstOrDefault()?.ToLower() ?? "equipe"
+            role = roles.FirstOrDefault()?.ToLower() ?? "analista"
         });
     }
 
-    // 5. UPDATE (PUT)
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+    {
+        var user = await _userManager.FindByNameAsync(dto.Username);
+        if (user == null)
+            return NotFound(new[] { "Usuário não encontrado." });
+
+        var result = await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+
+        if (result.Succeeded)
+            return Ok(new { message = "Senha alterada com sucesso!" });
+
+        return BadRequest(result.Errors.Select(e => e.Description));
+    }
+
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserDto dto)
     {
@@ -125,9 +141,9 @@ public class UserController : ControllerBase
         {
             var existingUser = await _userManager.FindByNameAsync(dto.Username);
             if (existingUser != null) return BadRequest(new[] { "Este nome de usuário já está em uso." });
-            
+
             user.UserName = dto.Username;
-            user.Email = $"{dto.Username}@sistema.local";
+            user.Email = $"{dto.Username}@recepcao.ibe";
             await _userManager.UpdateAsync(user);
         }
 
@@ -142,14 +158,13 @@ public class UserController : ControllerBase
         // Atualiza a Role (Nível de Acesso)
         var currentRoles = await _userManager.GetRolesAsync(user);
         await _userManager.RemoveFromRolesAsync(user, currentRoles);
-        
+
         string roleFormatada = char.ToUpper(dto.Role[0]) + dto.Role.Substring(1).ToLower();
         await _userManager.AddToRoleAsync(user, roleFormatada);
 
         return Ok(new { message = "Usuário atualizado com sucesso." });
     }
 
-    // 6. DELETE (DELETE)
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(string id)
     {

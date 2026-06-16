@@ -5,6 +5,7 @@ import { Home } from './components/Home';
 import { Contagem } from './components/Contagem';
 import { Login } from './components/Login';
 import { Usuarios } from './components/Usuarios';
+import { Profile } from './components/Profile';
 
 export interface Usuario {
   username: string;
@@ -65,11 +66,12 @@ function App() {
     setTimeout(() => { setMensagem(null); }, 5000);
   };
 
-  const setTela = (tela: 'login' | 'home' | 'contagem' | 'config') => {
+  const setTela = (tela: 'login' | 'home' | 'contagem' | 'config' | 'perfil') => {
     if (tela === 'login') navigate('/login');
     else if (tela === 'home') navigate('/');
     else if (tela === 'contagem') navigate('/contagem');
     else if (tela === 'config') navigate('/usuarios');
+    else if (tela === 'perfil') navigate('/perfil');
   };
 
   const carregarCultos = async () => {
@@ -242,6 +244,12 @@ function App() {
             ) : (
               <Navigate to="/" replace />
             )}
+          </RotaProtegida>
+        } />
+
+        <Route path="/perfil" element={
+          <RotaProtegida usuarioLogado={usuarioLogado}>
+            <Profile cores={theme} setTela={setTela} usuarioLogado={usuarioLogado!} mostrarMensagem={mostrarMensagem} />
           </RotaProtegida>
         } />
 
