@@ -8,7 +8,7 @@ interface HomeProps {
   listaCultos: Culto[];
   textoEscala: string;
   handleChange: (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  setTela: (tela: 'home' | 'contagem' | 'config' | 'login') => void;
+  setTela: (tela: 'home' | 'contagem' | 'config' | 'login' | 'perfil') => void;
   prepararEdicao: (culto: Culto) => void;
   limparFormulario: () => void;
   excluirCulto: (id: string) => void;
@@ -82,6 +82,11 @@ export function Home({ form, editandoId, listaCultos, textoEscala, handleChange,
         <button onClick={() => { onLogout(); setTela('login'); }} style={{ background: cores?.cartao, border: `1px solid ${cores?.borda}`, color: cores?.texto, padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
           Sair
         </button>
+
+        <button onClick={() => setTela('perfil')} style={{ background: cores?.botaoInativoFundo, border: `1px solid ${cores?.borda}`, color: cores?.texto, padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+          Perfil
+        </button>
+        
         {podeEditar && (
           <button onClick={() => setTela('config')} style={{ background: cores?.primaria, border: 'none', color: '#fff', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
             Usuários

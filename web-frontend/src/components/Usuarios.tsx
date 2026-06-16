@@ -42,7 +42,7 @@ export function Usuarios({ cores, setTela, usuarioLogado, mostrarMensagem }: Usu
       });
       if (resposta.ok) {
         mostrarMensagem(`Usuário ${novoUserForm.username} criado com sucesso!`, 'sucesso');
-        setNovoUserForm({ username: '', password: '', role: 'equipe' });
+        setNovoUserForm({ username: '', password: '', role: 'analista' });
         if (usuarioLogado?.role === 'admin') carregarUsuarios();
       } else {
         const erros = await resposta.json();
