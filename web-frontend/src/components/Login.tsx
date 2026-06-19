@@ -12,10 +12,11 @@ export function Login({ cores, onLoginSuccess, mostrarMensagem }: LoginProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [carregando, setCarregando] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     if (!username.trim() || !password.trim()) {
       mostrarMensagem('Preencha todos os campos.', 'erro');
       return;
@@ -47,34 +48,68 @@ export function Login({ cores, onLoginSuccess, mostrarMensagem }: LoginProps) {
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', padding: '20px', boxSizing: 'border-box' }}>
-      <form 
-        onSubmit={handleLogin} 
+      <form
+        onSubmit={handleLogin}
         style={{ width: '100%', maxWidth: '380px', backgroundColor: cores.cartao, padding: '40px 30px', borderRadius: '24px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', border: `1px solid ${cores.borda}` }}
       >
         <div style={{ textAlign: 'center', marginBottom: '30px' }}>
           <h2 style={{ color: cores.texto, margin: 0, fontSize: '1.8rem', fontWeight: 800 }}>Login</h2>
         </div>
-        
+
         <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: cores.subtexto, marginBottom: '8px', textTransform: 'uppercase' }}>Usuário</label>
-        <input 
-          type="text" 
-          value={username} 
-          onChange={e => setUsername(e.target.value)} 
+        <input
+          type="text"
+          value={username}
+          onChange={e => setUsername(e.target.value)}
           placeholder="Insira seu nome de usuário"
-          style={{ width: '100%', padding: '16px', backgroundColor: cores.inputFundo, color: cores.inputTexto, borderRadius: '12px', border: 'none', marginBottom: '20px', outline: 'none', boxSizing: 'border-box' }} 
+          style={{ width: '100%', padding: '16px', backgroundColor: cores.inputFundo, color: cores.inputTexto, borderRadius: '12px', border: 'none', marginBottom: '20px', outline: 'none', boxSizing: 'border-box' }}
         />
-        
+
         <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: cores.subtexto, marginBottom: '8px', textTransform: 'uppercase' }}>Senha</label>
-        <input 
-          type="password" 
-          value={password} 
-          onChange={e => setPassword(e.target.value)} 
-          placeholder="••••••••"
-          style={{ width: '100%', padding: '16px', backgroundColor: cores.inputFundo, color: cores.inputTexto, borderRadius: '12px', border: 'none', marginBottom: '32px', outline: 'none', boxSizing: 'border-box' }} 
-        />
-        
-        <button 
-          type="submit" 
+        <div style={{ position: 'relative', width: '100%', marginBottom: '32px' }}>
+          
+          <input 
+            type={mostrarSenha ? "text" : "password"} 
+            value={password} 
+            onChange={e => setPassword(e.target.value)} 
+            placeholder="••••••••"
+            style={{ 
+              width: '100%', 
+              padding: '16px', 
+              paddingRight: '48px', /* Dá espaço para o olho não ficar por cima do texto */
+              backgroundColor: cores.inputFundo, 
+              color: cores.inputTexto, 
+              borderRadius: '12px', 
+              border: 'none', 
+              outline: 'none', 
+              boxSizing: 'border-box' 
+            }} 
+          />
+          
+          {/* O BOTÃO FILHO É ABSOLUTE */}
+          <button 
+            type="button" 
+            onClick={() => setMostrarSenha(!mostrarSenha)} 
+            style={{ 
+              position: 'absolute', 
+              right: '16px', /* Fixa a 16px da borda direita da div pai */
+              top: '50%', 
+              transform: 'translateY(-50%)', /* Centraliza perfeitamente na vertical */
+              background: 'none', 
+              border: 'none', 
+              color: cores.subtexto, 
+              cursor: 'pointer', 
+              fontSize: '1.2rem', 
+              padding: '0' 
+            }}
+          >
+            {mostrarSenha ? '🙊' : '🙈​'}
+          </button>
+
+        </div>
+
+        <button
+          type="submit"
           disabled={carregando}
           style={{ width: '100%', padding: '16px', backgroundColor: cores.primaria, color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '1.1rem', cursor: carregando ? 'default' : 'pointer', opacity: carregando ? 0.7 : 1, transition: 'opacity 0.2s' }}
         >

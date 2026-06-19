@@ -64,4 +64,6 @@ public class Culto
 
     [JsonPropertyName("contagens")]
     public Contagem? Contagens { get; set; }
+
+    public bool IsDeleted { get; set; } = false;
 }
