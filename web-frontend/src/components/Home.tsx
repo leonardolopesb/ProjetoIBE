@@ -30,6 +30,9 @@ export function Home({ form, editandoId, listaCultos, textoEscala, handleChange,
   // O analista pode exportar os dados
   const podeExportar = usuarioLogado.role === 'analista';
 
+  // O admin pode visualizar os usuários
+  const podeVisualizar = usuarioLogado.role === 'admin';
+
   // em JSON
   const exportarJson = (culto: Culto) => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(culto, null, 2));
@@ -87,7 +90,7 @@ export function Home({ form, editandoId, listaCultos, textoEscala, handleChange,
           Perfil
         </button>
         
-        {podeEditar && (
+        {podeVisualizar && (
           <button onClick={() => setTela('config')} style={{ background: cores?.primaria, border: 'none', color: '#fff', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
             Usuários
           </button>
