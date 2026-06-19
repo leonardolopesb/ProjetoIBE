@@ -110,6 +110,21 @@ public class CultosController : ControllerBase
             .ToListAsync();
     }
 
+    [HttpPut("{id}/restaurar")]
+    // [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> RestaurarCulto(Guid id)
+    {
+        var culto = await _context.Cultos.FindAsync(id);
+        
+        if (culto == null) return NotFound();
+        if (!culto.IsDeleted) return BadRequest("Este culto não está na lixeira.");
+
+        culto.IsDeleted = false; // Tira da lixeira
+        
+        await _context.SaveChangesAsync();
+        return NoContent();
+    }
+
     // DELETE: api/Cultos/{id}/permanente (HARD DELETE)
     [HttpDelete("{id}/permanente")]
     // [Authorize(Roles = "Admin")]

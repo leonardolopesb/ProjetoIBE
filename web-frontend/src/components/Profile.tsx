@@ -26,18 +26,18 @@ const InputSenha = ({ label, valor, setValor, ver, setVer, cores, placeholder = 
       {label}
     </label>
     <div style={{ position: 'relative' }}>
-      <input 
-        type={ver ? "text" : "password"} 
-        value={valor} 
-        onChange={e => setValor(e.target.value)} 
-        required 
-        minLength={8} 
-        placeholder={placeholder} 
-        style={{ width: '100%', padding: '14px', paddingRight: '48px', backgroundColor: cores.inputFundo, color: cores.inputTexto, borderRadius: '8px', border: 'none', outline: 'none', boxSizing: 'border-box' }} 
+      <input
+        type={ver ? "text" : "password"}
+        value={valor}
+        onChange={e => setValor(e.target.value)}
+        required
+        minLength={8}
+        placeholder={placeholder}
+        style={{ width: '100%', padding: '14px', paddingRight: '48px', backgroundColor: cores.inputFundo, color: cores.inputTexto, borderRadius: '8px', border: 'none', outline: 'none', boxSizing: 'border-box' }}
       />
-      <button 
-        type="button" 
-        onClick={() => setVer(!ver)} 
+      <button
+        type="button"
+        onClick={() => setVer(!ver)}
         style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: cores.subtexto, cursor: 'pointer', fontSize: '1.2rem', padding: '0' }}
       >
         {ver ? '🙊' : '🙈​'}
@@ -82,7 +82,7 @@ export function Profile({ cores, setTela, usuarioLogado, mostrarMensagem }: Prof
 
   const handleMudarSenha = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (novaSenha !== confirmarSenha) {
       mostrarMensagem('A nova senha e a confirmação não batem.', 'erro');
       return;
@@ -117,7 +117,7 @@ export function Profile({ cores, setTela, usuarioLogado, mostrarMensagem }: Prof
 
   const excluirPermanente = async (id: string) => {
     if (!window.confirm('Excluir este culto PERMANENTEMENTE? Esta ação não pode ser desfeita.')) return;
-    
+
     try {
       const resposta = await fetch(`https://projetoibe.onrender.com/api/Cultos/${id}/permanente`, { method: 'DELETE' });
       if (resposta.ok) {
@@ -129,10 +129,26 @@ export function Profile({ cores, setTela, usuarioLogado, mostrarMensagem }: Prof
     }
   };
 
+  const restaurarCulto = async (id: string) => {
+    if (!window.confirm('Deseja restaurar este culto? Ele voltará para a lista principal.')) return;
+
+    try {
+      const resposta = await fetch(`https://projetoibe.onrender.com/api/Cultos/${id}/restaurar`, { method: 'PUT' });
+      if (resposta.ok) {
+        mostrarMensagem('Culto restaurado com sucesso!', 'sucesso');
+        carregarDeletados();
+      } else {
+        mostrarMensagem('Erro ao restaurar o culto.', 'erro');
+      }
+    } catch {
+      mostrarMensagem('Erro de conexão ao restaurar.', 'erro');
+    }
+  };
+
   // 4. RENDERIZAÇÃO DA INTERFACE
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px', minHeight: '100vh', boxSizing: 'border-box' }}>
-      
+
       {/* CABEÇALHO */}
       <div style={{ width: '100%', maxWidth: '420px', display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
         <button onClick={() => setTela('home')} style={{ background: 'none', border: 'none', color: cores.subtexto, fontSize: '1rem', cursor: 'pointer', fontWeight: 'bold' }}>← Voltar</button>
@@ -142,15 +158,15 @@ export function Profile({ cores, setTela, usuarioLogado, mostrarMensagem }: Prof
 
       {/* FORMULÁRIO DE SENHA */}
       <form onSubmit={handleMudarSenha} style={{ width: '100%', maxWidth: '420px', backgroundColor: cores.cartao, padding: '32px', borderRadius: '16px', border: `1px solid ${cores.borda}`, boxShadow: '0 10px 30px rgba(0,0,0,0.05)', marginBottom: '32px' }}>
-        
+
         <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: cores.subtexto, marginBottom: '8px', textTransform: 'uppercase' }}>Usuário Logado</label>
         <div style={{ width: '100%', padding: '16px', backgroundColor: cores.botaoInativoFundo, color: cores.subtexto, borderRadius: '8px', border: 'none', marginBottom: '32px', fontWeight: 'bold', boxSizing: 'border-box' }}>
-          {usuarioLogado.username} 
+          {usuarioLogado.username}
           <span style={{ float: 'right', fontWeight: 'normal', fontSize: '0.8rem', textTransform: 'uppercase' }}>({usuarioLogado.role})</span>
         </div>
 
         <h3 style={{ marginTop: 0, color: cores.texto, borderBottom: `1px solid ${cores.borda}`, paddingBottom: '10px', marginBottom: '20px', fontSize: '1.1rem' }}>Segurança</h3>
-        
+
         <InputSenha label="Senha Atual" valor={senhaAntiga} setValor={setSenhaAntiga} ver={verAntiga} setVer={setVerAntiga} cores={cores} placeholder="Sua senha atual..." />
         <InputSenha label="Nova Senha" valor={novaSenha} setValor={setNovaSenha} ver={verNova} setVer={setVerNova} cores={cores} placeholder="Mínimo de 8 caracteres" />
         <InputSenha label="Confirmar Nova Senha" valor={confirmarSenha} setValor={setConfirmarSenha} ver={verConfirmacao} setVer={setVerConfirmacao} cores={cores} />
@@ -166,7 +182,7 @@ export function Profile({ cores, setTela, usuarioLogado, mostrarMensagem }: Prof
           <h3 style={{ marginTop: 0, color: cores.texto, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             🗑️ Lixeira de Cultos
           </h3>
-          
+
           {cultosDeletados.length === 0 ? (
             <p style={{ color: cores.hint, textAlign: 'center', fontSize: '0.9rem', margin: '10px 0' }}>Nenhum culto excluído no momento.</p>
           ) : (
@@ -179,13 +195,24 @@ export function Profile({ cores, setTela, usuarioLogado, mostrarMensagem }: Prof
                     </strong>
                     <span style={{ color: cores.subtexto, fontSize: '0.8rem' }}>Líder: {c.lider_recepcao}</span>
                   </div>
-                  <button 
-                    onClick={() => excluirPermanente(c.id)} 
-                    style={{ backgroundColor: '#EF4444', color: 'white', border: 'none', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem' }} 
-                    title="Excluir Permanentemente"
-                  >
-                    Apagar
-                  </button>
+
+                  {/* DIV DOS BOTÕES (AGORA COM O RESTAURAR) */}
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      onClick={() => restaurarCulto(c.id)}
+                      style={{ backgroundColor: '#10B981', color: 'white', border: 'none', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem' }}
+                      title="Restaurar para a lista principal"
+                    >
+                      Restaurar
+                    </button>
+                    <button
+                      onClick={() => excluirPermanente(c.id)}
+                      style={{ backgroundColor: '#EF4444', color: 'white', border: 'none', borderRadius: '6px', padding: '6px 12px', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem' }}
+                      title="Excluir Permanentemente"
+                    >
+                      Apagar
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
